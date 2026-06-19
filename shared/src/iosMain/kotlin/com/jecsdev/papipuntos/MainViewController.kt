@@ -1,4 +1,4 @@
-package com.jecsdev.myapplication
+package com.jecsdev.papipuntos
 
 import androidx.compose.ui.window.ComposeUIViewController
 

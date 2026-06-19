@@ -21,11 +21,11 @@ dependencies {
 }
 
 android {
-    namespace = "com.jecsdev.myapplication"
+    namespace = "com.jecsdev.papipuntos"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "com.jecsdev.myapplication"
+        applicationId = "com.jecsdev.papipuntos"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1

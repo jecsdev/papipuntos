@@ -1,4 +1,4 @@
-package com.jecsdev.myapplication
+package com.jecsdev.papipuntos
 
 class Greeting {
     private val platform = getPlatform()

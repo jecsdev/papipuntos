@@ -1,9 +1,9 @@
-package com.jecsdev.myapplication
+package com.jecsdev.papipuntos
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class SharedCommonTest {
+class SharedLogicIOSTest {
 
     @Test
     fun example() {

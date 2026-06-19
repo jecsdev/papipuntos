@@ -1,4 +1,4 @@
-package com.jecsdev.myapplication
+package com.jecsdev.papipuntos
 
 interface Platform {
     val name: String
