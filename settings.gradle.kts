@@ -31,3 +31,4 @@ dependencyResolutionManagement {
 include(":androidApp")
 include(":shared")
 include(":core:designsystem")
+include(":feature:scoreboard")

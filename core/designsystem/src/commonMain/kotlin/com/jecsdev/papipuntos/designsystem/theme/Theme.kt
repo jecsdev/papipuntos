@@ -53,7 +53,7 @@ fun PapiPuntosTheme(
     ) {
         MaterialTheme(
             colorScheme = PapiPuntosColorScheme,
-            typography = PapiPuntosTypography,
+            typography = rememberPapiPuntosTypography(),
             shapes = PapiPuntosMaterialShapes,
             content = content,
         )
