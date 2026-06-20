@@ -30,5 +30,8 @@ dependencyResolutionManagement {
 
 include(":androidApp")
 include(":shared")
+include(":core:model")
 include(":core:designsystem")
 include(":feature:scoreboard")
+include(":feature:login")
+include(":feature:addaction")

@@ -40,7 +40,10 @@ kotlin {
         }
         commonMain.dependencies {
             implementation(projects.core.designsystem)
+            implementation(projects.core.model)
             implementation(projects.feature.scoreboard)
+            implementation(projects.feature.login)
+            implementation(projects.feature.addaction)
 
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)

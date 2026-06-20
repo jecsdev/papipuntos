@@ -33,7 +33,7 @@ import com.jecsdev.papipuntos.feature.scoreboard.component.ScoreCard
 import com.jecsdev.papipuntos.feature.scoreboard.component.ScoreboardBottomBar
 import com.jecsdev.papipuntos.feature.scoreboard.component.ScoreboardHeader
 import com.jecsdev.papipuntos.feature.scoreboard.component.ScoreboardTab
-import com.jecsdev.papipuntos.feature.scoreboard.model.Player
+import com.jecsdev.papipuntos.model.Player
 import androidx.compose.ui.tooling.preview.Preview
 
 /** Production entry point: pulls state from the ViewModel and drives [ScoreboardScreenContent]. */

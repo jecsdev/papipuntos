@@ -3,7 +3,7 @@ package com.jecsdev.papipuntos.feature.scoreboard.component
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.jecsdev.papipuntos.designsystem.component.CounterCard
-import com.jecsdev.papipuntos.feature.scoreboard.model.Player
+import com.jecsdev.papipuntos.model.Player
 
 /**
  * Per-profile points card (Papi blue / Mami pink), built on the generic

@@ -14,7 +14,7 @@ kotlin {
     )
 
     androidLibrary {
-        namespace = "com.jecsdev.papipuntos.feature.scoreboard"
+        namespace = "com.jecsdev.papipuntos.feature.login"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
 
@@ -31,7 +31,6 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
         }
         commonMain.dependencies {
-            implementation(projects.core.model)
             implementation(projects.core.designsystem)
 
             implementation(libs.compose.runtime)
@@ -39,8 +38,6 @@ kotlin {
             implementation(libs.compose.material3)
             implementation(libs.compose.ui)
             implementation(libs.compose.uiToolingPreview)
-            implementation(libs.androidx.lifecycle.viewmodelCompose)
-            implementation(libs.androidx.lifecycle.runtimeCompose)
         }
     }
 }

@@ -1,7 +1,7 @@
 package com.jecsdev.papipuntos.feature.scoreboard
 
 import com.jecsdev.papipuntos.feature.scoreboard.model.ActionEntry
-import com.jecsdev.papipuntos.feature.scoreboard.model.Player
+import com.jecsdev.papipuntos.model.Player
 
 /**
  * Hardcoded sample state mirroring the mockup. Shared by the ViewModel and the

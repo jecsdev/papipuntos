@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
 import com.jecsdev.papipuntos.designsystem.theme.PapiPuntosTheme
-import com.jecsdev.papipuntos.feature.scoreboard.model.Player
+import com.jecsdev.papipuntos.model.Player
 
 /**
  * Maps a [Player] to its theme colors and display copy. Centralizes the

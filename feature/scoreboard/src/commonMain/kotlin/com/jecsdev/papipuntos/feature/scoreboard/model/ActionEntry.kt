@@ -1,5 +1,7 @@
 package com.jecsdev.papipuntos.feature.scoreboard.model
 
+import com.jecsdev.papipuntos.model.Player
+
 /** A single logged action shown in the "Últimas acciones" list. */
 data class ActionEntry(
     val id: String,
