@@ -36,6 +36,15 @@ internal object PapiPuntosPalette {
     val PapiSoft = Color(0xFFD4F0FF)    // --papi-soft
     val Mami = Color(0xFFFF8FAB)        // --mami (pink)
     val MamiSoft = Color(0xFFFFE5E9)    // --mami-soft
+
+    // Premium / gamification accents. The mockup reaches for Tailwind's stock
+    // amber (premium) and orange (streak flame) ramps rather than CSS variables.
+    val PremiumBg = Color(0xFFFFFBEB)     // amber-50
+    val PremiumBorder = Color(0xFFFCD34D) // amber-300
+    val Premium = Color(0xFFFBBF24)       // amber-400
+    val PremiumIcon = Color(0xFFF59E0B)   // amber-500
+    val PremiumText = Color(0xFFB45309)   // amber-700
+    val Streak = Color(0xFFF97316)        // orange-500
 }
 
 /**
@@ -50,6 +59,12 @@ data class PapiPuntosColors(
     val papiSoft: Color,
     val mami: Color,
     val mamiSoft: Color,
+    val premiumBg: Color,
+    val premiumBorder: Color,
+    val premium: Color,
+    val premiumIcon: Color,
+    val premiumText: Color,
+    val streak: Color,
 )
 
 val LightPapiPuntosColors = PapiPuntosColors(
@@ -58,4 +73,10 @@ val LightPapiPuntosColors = PapiPuntosColors(
     papiSoft = PapiPuntosPalette.PapiSoft,
     mami = PapiPuntosPalette.Mami,
     mamiSoft = PapiPuntosPalette.MamiSoft,
+    premiumBg = PapiPuntosPalette.PremiumBg,
+    premiumBorder = PapiPuntosPalette.PremiumBorder,
+    premium = PapiPuntosPalette.Premium,
+    premiumIcon = PapiPuntosPalette.PremiumIcon,
+    premiumText = PapiPuntosPalette.PremiumText,
+    streak = PapiPuntosPalette.Streak,
 )

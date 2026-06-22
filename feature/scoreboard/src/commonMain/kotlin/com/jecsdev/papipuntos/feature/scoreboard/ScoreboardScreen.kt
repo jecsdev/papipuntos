@@ -42,12 +42,23 @@ fun ScoreboardScreen(
     viewModel: ScoreboardViewModel = viewModel { ScoreboardViewModel() },
     onAddAction: () -> Unit = {},
     onSeeAllHistory: () -> Unit = {},
+    onOpenRewards: () -> Unit = {},
+    onOpenProfile: () -> Unit = {},
 ) {
     var selectedTab by remember { mutableStateOf(ScoreboardTab.Home) }
     ScoreboardScreenContent(
         state = viewModel.uiState,
         selectedTab = selectedTab,
-        onTabSelected = { selectedTab = it },
+        // Tabs that own a screen navigate away; Home just stays put.
+        onTabSelected = { tab ->
+            selectedTab = tab
+            when (tab) {
+                ScoreboardTab.Home -> Unit
+                ScoreboardTab.History -> onSeeAllHistory()
+                ScoreboardTab.Rewards -> onOpenRewards()
+                ScoreboardTab.Profile -> onOpenProfile()
+            }
+        },
         onAddAction = onAddAction,
         onSeeAllHistory = onSeeAllHistory,
     )

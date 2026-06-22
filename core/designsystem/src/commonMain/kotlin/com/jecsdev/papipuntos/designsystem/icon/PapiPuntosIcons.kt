@@ -65,6 +65,46 @@ object PapiPuntosIcons {
         materialIcon("ChevronLeft", "M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z")
     }
 
+    val ChevronDown: ImageVector by lazy {
+        materialIcon("ChevronDown", "M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z")
+    }
+
+    val Check: ImageVector by lazy {
+        materialIcon("Check", "M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z")
+    }
+
+    val Crown: ImageVector by lazy {
+        materialIcon("Crown", "M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm0 3c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-1H5v1z")
+    }
+
+    val Trophy: ImageVector by lazy {
+        materialIcon(
+            "Trophy",
+            "M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 " +
+                "2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 " +
+                "8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z",
+        )
+    }
+
+    val Flame: ImageVector by lazy {
+        materialIcon(
+            "Flame",
+            "M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 " +
+                "7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 " +
+                "0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 " +
+                "2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z",
+        )
+    }
+
+    val Sparkles: ImageVector by lazy {
+        materialIcon(
+            "Sparkles",
+            "M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 " +
+                "12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 " +
+                "19l-2.75-1.25L19 15z",
+        )
+    }
+
     val Search: ImageVector by lazy {
         materialIcon(
             "Search",
