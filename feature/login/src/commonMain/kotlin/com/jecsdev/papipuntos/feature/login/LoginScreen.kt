@@ -45,6 +45,7 @@ import com.jecsdev.papipuntos.designsystem.component.SegmentedToggle
 import com.jecsdev.papipuntos.designsystem.component.SocialButton
 import com.jecsdev.papipuntos.designsystem.icon.PapiPuntosIcons
 import com.jecsdev.papipuntos.designsystem.theme.PapiPuntosTheme
+import org.koin.compose.viewmodel.koinViewModel
 
 /** Auth entry modes shown in the segmented switch. */
 enum class LoginMode(val label: String, val cta: String) {
@@ -52,17 +53,28 @@ enum class LoginMode(val label: String, val cta: String) {
     SignUp("Crear cuenta", "Crear cuenta 💖"),
 }
 
-/** Production entry point: owns the local form state and delegates to [LoginScreenContent]. */
+/**
+ * Production entry point: owns the local form state and delegates to
+ * [LoginScreenContent]. Success routes through [AuthViewModel.authState]; `App.kt`
+ * reacts to the resulting [com.jecsdev.papipuntos.model.AuthState] instead of a callback.
+ */
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
-    // `isSignUp` lets the caller send new accounts through profile setup first.
-    onAuthenticated: (isSignUp: Boolean) -> Unit = {},
+    viewModel: AuthViewModel = koinViewModel(),
 ) {
     var mode by remember { mutableStateOf(LoginMode.Login) }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    val authenticate = { onAuthenticated(mode == LoginMode.SignUp) }
+    // TODO(stage-2): surface viewModel.error on the login form
+    val submit = {
+        if (mode == LoginMode.SignUp) {
+            viewModel.signUp(email, password)
+        } else {
+            viewModel.logIn(email, password)
+        }
+        Unit
+    }
     LoginScreenContent(
         mode = mode,
         email = email,
@@ -70,9 +82,10 @@ fun LoginScreen(
         onModeChange = { mode = it },
         onEmailChange = { email = it },
         onPasswordChange = { password = it },
-        onSubmit = authenticate,
-        onContinueWithGoogle = authenticate,
-        onContinueWithApple = authenticate,
+        onSubmit = submit,
+        // Social sign-in is out of scope for stage 1.
+        onContinueWithGoogle = {},
+        onContinueWithApple = {},
         modifier = modifier,
     )
 }

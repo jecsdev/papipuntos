@@ -41,6 +41,7 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.core.designsystem)
             implementation(projects.core.model)
+            implementation(projects.core.data)
             implementation(projects.feature.scoreboard)
             implementation(projects.feature.login)
             implementation(projects.feature.addaction)
@@ -55,6 +56,11 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose)
+            // App.kt calls koinViewModel() directly (in AppRoot), so this module needs it too,
+            // not just the feature modules that already declare it — deviation from the spec list.
+            implementation(libs.koin.compose.viewmodel)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
