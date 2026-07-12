@@ -56,11 +56,13 @@ enum class LoginMode(val label: String, val cta: String) {
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
-    onAuthenticated: () -> Unit = {},
+    // `isSignUp` lets the caller send new accounts through profile setup first.
+    onAuthenticated: (isSignUp: Boolean) -> Unit = {},
 ) {
     var mode by remember { mutableStateOf(LoginMode.Login) }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    val authenticate = { onAuthenticated(mode == LoginMode.SignUp) }
     LoginScreenContent(
         mode = mode,
         email = email,
@@ -68,9 +70,9 @@ fun LoginScreen(
         onModeChange = { mode = it },
         onEmailChange = { email = it },
         onPasswordChange = { password = it },
-        onSubmit = onAuthenticated,
-        onContinueWithGoogle = onAuthenticated,
-        onContinueWithApple = onAuthenticated,
+        onSubmit = authenticate,
+        onContinueWithGoogle = authenticate,
+        onContinueWithApple = authenticate,
         modifier = modifier,
     )
 }

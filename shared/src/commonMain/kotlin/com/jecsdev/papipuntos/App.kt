@@ -9,6 +9,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.jecsdev.papipuntos.designsystem.theme.PapiPuntosTheme
 import com.jecsdev.papipuntos.feature.addaction.AddActionScreen
 import com.jecsdev.papipuntos.feature.login.LoginScreen
+import com.jecsdev.papipuntos.feature.login.ProfileSetupScreen
+import com.jecsdev.papipuntos.feature.login.ProfilesScreen
 import com.jecsdev.papipuntos.feature.profile.PlansScreen
 import com.jecsdev.papipuntos.feature.profile.ProfileScreen
 import com.jecsdev.papipuntos.feature.rewards.RedeemScreen
@@ -18,7 +20,7 @@ import com.jecsdev.papipuntos.feature.scoreboard.HistoryScreen
 import com.jecsdev.papipuntos.feature.scoreboard.ScoreboardScreen
 
 /** Screens the lightweight stand-in router can show. Real navigation comes later. */
-private enum class AppScreen { Login, Scoreboard, AddAction, History, Rewards, Redeem, Profile, Plans }
+private enum class AppScreen { Login, Setup, Profiles, Scoreboard, AddAction, History, Rewards, Redeem, Profile, Plans }
 
 @Composable
 @Preview
@@ -29,7 +31,20 @@ fun App() {
         var selectedReward by remember { mutableStateOf<Reward?>(null) }
         when (screen) {
             AppScreen.Login -> LoginScreen(
-                onAuthenticated = { screen = AppScreen.Scoreboard },
+                // New accounts set up their profiles first; returning users go
+                // straight to the Netflix-style profile gate.
+                onAuthenticated = { isSignUp ->
+                    screen = if (isSignUp) AppScreen.Setup else AppScreen.Profiles
+                },
+            )
+
+            AppScreen.Setup -> ProfileSetupScreen(
+                onSaved = { screen = AppScreen.Profiles },
+            )
+
+            AppScreen.Profiles -> ProfilesScreen(
+                onProfileUnlocked = { screen = AppScreen.Scoreboard },
+                onChangeAccount = { screen = AppScreen.Login },
             )
 
             AppScreen.Scoreboard -> ScoreboardScreen(

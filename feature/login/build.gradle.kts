@@ -32,6 +32,7 @@ kotlin {
         }
         commonMain.dependencies {
             implementation(projects.core.designsystem)
+            implementation(projects.core.model)
 
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
