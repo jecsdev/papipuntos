@@ -13,6 +13,8 @@ kotlin {
 }
 dependencies {
     implementation(projects.shared)
+    // Needed so the Application can set AppContextHolder (androidMain of :core:data).
+    implementation(projects.core.data)
 
     implementation(libs.androidx.activity.compose)
 

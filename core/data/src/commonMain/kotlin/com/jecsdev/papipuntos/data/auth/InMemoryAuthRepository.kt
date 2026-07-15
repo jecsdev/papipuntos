@@ -2,6 +2,7 @@ package com.jecsdev.papipuntos.data.auth
 
 import com.jecsdev.papipuntos.model.Account
 import com.jecsdev.papipuntos.model.AuthState
+import com.jecsdev.papipuntos.model.NewProfile
 import com.jecsdev.papipuntos.model.Player
 import com.jecsdev.papipuntos.model.Profile
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +19,7 @@ class InMemoryAuthRepository : AuthRepository {
     override val state: StateFlow<AuthState> = _state.asStateFlow()
 
     private var account: Account? = null
-    private var profiles: List<Profile> = emptyList()
+    private var profiles: List<NewProfile> = emptyList()
 
     override suspend fun signUp(email: String, password: String): Result<Unit> {
         if (email.isBlank() || password.isBlank()) {
@@ -41,14 +42,14 @@ class InMemoryAuthRepository : AuthRepository {
         _state.value = if (profiles.isEmpty()) {
             AuthState.NeedsSetup
         } else {
-            AuthState.ProfileSelection(profiles)
+            AuthState.ProfileSelection(profiles.toIdentity())
         }
         return Result.success(Unit)
     }
 
-    override suspend fun saveProfiles(papi: Profile, mami: Profile): Result<Unit> {
+    override suspend fun saveProfiles(papi: NewProfile, mami: NewProfile): Result<Unit> {
         profiles = listOf(papi, mami)
-        _state.value = AuthState.ProfileSelection(profiles)
+        _state.value = AuthState.ProfileSelection(profiles.toIdentity())
         return Result.success(Unit)
     }
 
@@ -58,9 +59,13 @@ class InMemoryAuthRepository : AuthRepository {
         if (profile.pin != pin) {
             return Result.failure(IllegalStateException("PIN incorrecto"))
         }
-        _state.value = AuthState.Active(profile, profiles)
+        _state.value = AuthState.Active(profile.toIdentity(), profiles.toIdentity())
         return Result.success(Unit)
     }
+
+    private fun NewProfile.toIdentity(): Profile = Profile(player, name, emoji)
+
+    private fun List<NewProfile>.toIdentity(): List<Profile> = map { it.toIdentity() }
 
     override fun logOut() {
         // Keep `account` and `profiles` around so re-login works within the same process session.

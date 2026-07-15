@@ -44,8 +44,8 @@ import com.jecsdev.papipuntos.designsystem.component.PapiPuntosTextField
 import com.jecsdev.papipuntos.designsystem.component.PrimaryActionButton
 import com.jecsdev.papipuntos.designsystem.icon.PapiPuntosIcons
 import com.jecsdev.papipuntos.designsystem.theme.PapiPuntosTheme
+import com.jecsdev.papipuntos.model.NewProfile
 import com.jecsdev.papipuntos.model.Player
-import com.jecsdev.papipuntos.model.Profile
 import org.koin.compose.viewmodel.koinViewModel
 
 /** Emojis offered as avatars while setting up the two profiles. */
@@ -96,8 +96,8 @@ fun ProfileSetupScreen(
             attemptedSave = true
             if (valid) {
                 viewModel.saveProfiles(
-                    Profile(Player.Papi, papi.name, papi.emoji, papi.pin),
-                    Profile(Player.Mami, mami.name, mami.emoji, mami.pin),
+                    NewProfile(Player.Papi, papi.name, papi.emoji, papi.pin),
+                    NewProfile(Player.Mami, mami.name, mami.emoji, mami.pin),
                 )
             }
         },

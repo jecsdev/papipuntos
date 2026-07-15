@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jecsdev.papipuntos.data.db.platformAuthModule
 import com.jecsdev.papipuntos.data.di.dataModule
 import com.jecsdev.papipuntos.designsystem.theme.PapiPuntosTheme
 import com.jecsdev.papipuntos.feature.addaction.AddActionScreen
@@ -33,7 +34,7 @@ private enum class AppScreen { Scoreboard, AddAction, History, Rewards, Redeem, 
 @Composable
 @Preview
 fun App() {
-    KoinApplication(application = { modules(dataModule, loginModule, scoreboardModule) }) {
+    KoinApplication(application = { modules(platformAuthModule, dataModule, loginModule, scoreboardModule) }) {
         PapiPuntosTheme { AppRoot() }
     }
 }

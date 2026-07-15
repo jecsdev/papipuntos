@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jecsdev.papipuntos.data.auth.AuthRepository
 import com.jecsdev.papipuntos.model.AuthState
+import com.jecsdev.papipuntos.model.NewProfile
 import com.jecsdev.papipuntos.model.Player
-import com.jecsdev.papipuntos.model.Profile
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -39,7 +39,7 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
             .onFailure { _error.value = it.message }
     }
 
-    fun saveProfiles(papi: Profile, mami: Profile) = viewModelScope.launch {
+    fun saveProfiles(papi: NewProfile, mami: NewProfile) = viewModelScope.launch {
         repository.saveProfiles(papi, mami)
             .onSuccess { _error.value = null }
     }
