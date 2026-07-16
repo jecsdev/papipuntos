@@ -1,10 +1,17 @@
 package com.jecsdev.papipuntos
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jecsdev.papipuntos.data.db.platformAuthModule
@@ -45,10 +52,21 @@ private fun AppRoot() {
     val authViewModel: AuthViewModel = koinViewModel()
     val authState by authViewModel.authState.collectAsStateWithLifecycle()
     when (val state = authState) {
+        AuthState.Loading -> SplashScreen()
         AuthState.LoggedOut -> LoginScreen()
         AuthState.NeedsSetup -> ProfileSetupScreen()
         is AuthState.ProfileSelection -> ProfilesScreen(profiles = state.profiles)
         is AuthState.Active -> ActiveApp(onLogout = { authViewModel.logOut() })
+    }
+}
+
+/** Cold-start placeholder shown while [AuthState.Loading] resolves the persisted session. */
+@Composable
+private fun SplashScreen() {
+    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+        }
     }
 }
 

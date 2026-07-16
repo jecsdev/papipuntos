@@ -9,9 +9,12 @@ import kotlinx.coroutines.flow.StateFlow
 interface AuthRepository {
     val state: StateFlow<AuthState>
 
+    /** Cold-start restore: reads persisted state and moves off [AuthState.Loading]. */
+    suspend fun bootstrap()
+
     suspend fun signUp(email: String, password: String): Result<Unit>
     suspend fun logIn(email: String, password: String): Result<Unit>
     suspend fun saveProfiles(papi: NewProfile, mami: NewProfile): Result<Unit>
     suspend fun unlockProfile(player: Player, pin: String): Result<Unit>
-    fun logOut()
+    suspend fun logOut()
 }

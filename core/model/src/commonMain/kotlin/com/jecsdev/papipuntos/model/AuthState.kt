@@ -2,6 +2,9 @@ package com.jecsdev.papipuntos.model
 
 /** Drives which top-level screen the app shows, based on local auth progress. */
 sealed interface AuthState {
+    /** Cold-start restore in progress: the DB is being read to decide the first screen. */
+    data object Loading : AuthState
+
     /** No account signed in yet: show the login/sign-up screen. */
     data object LoggedOut : AuthState
 

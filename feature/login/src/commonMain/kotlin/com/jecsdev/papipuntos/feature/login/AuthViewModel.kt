@@ -19,8 +19,13 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
     val authState: StateFlow<AuthState> = repository.state.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5_000),
-        AuthState.LoggedOut,
+        AuthState.Loading,
     )
+
+    init {
+        // Restore the persisted session on cold start; the flow stays on Loading until this resolves.
+        viewModelScope.launch { repository.bootstrap() }
+    }
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
@@ -50,7 +55,7 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
             .onFailure { _error.value = it.message }
     }
 
-    fun logOut() = repository.logOut()
+    fun logOut() = viewModelScope.launch { repository.logOut() }
 
     fun clearError() {
         _error.value = null

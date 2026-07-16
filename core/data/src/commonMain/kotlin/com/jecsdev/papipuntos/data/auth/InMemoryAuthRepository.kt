@@ -10,16 +10,27 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * Stage 1 implementation: everything lives in process memory only. Nothing is
- * persisted across app restarts; that lands with real storage in stage 2.
+ * In-memory test double: everything lives in process memory only, nothing survives a
+ * restart. Mirrors [RoomAuthRepository]'s contract (including the session flag and
+ * [bootstrap]) so it can stand in for previews and tests.
  */
 class InMemoryAuthRepository : AuthRepository {
 
-    private val _state = MutableStateFlow<AuthState>(AuthState.LoggedOut)
+    private val _state = MutableStateFlow<AuthState>(AuthState.Loading)
     override val state: StateFlow<AuthState> = _state.asStateFlow()
 
     private var account: Account? = null
     private var profiles: List<NewProfile> = emptyList()
+    private var sessionActive: Boolean = false
+
+    override suspend fun bootstrap() {
+        val currentAccount = account
+        _state.value = when {
+            currentAccount == null || !sessionActive -> AuthState.LoggedOut
+            profiles.isEmpty() -> AuthState.NeedsSetup
+            else -> AuthState.ProfileSelection(profiles.toIdentity())
+        }
+    }
 
     override suspend fun signUp(email: String, password: String): Result<Unit> {
         if (email.isBlank() || password.isBlank()) {
@@ -28,17 +39,19 @@ class InMemoryAuthRepository : AuthRepository {
         if (account != null) {
             return Result.failure(IllegalStateException("Ya existe una cuenta con este correo"))
         }
-        account = Account(email, password)
+        account = Account(email.trim().lowercase(), password)
         profiles = emptyList()
+        sessionActive = true
         _state.value = AuthState.NeedsSetup
         return Result.success(Unit)
     }
 
     override suspend fun logIn(email: String, password: String): Result<Unit> {
         val currentAccount = account
-        if (currentAccount == null || currentAccount.email != email || currentAccount.password != password) {
+        if (currentAccount == null || currentAccount.email != email.trim().lowercase() || currentAccount.password != password) {
             return Result.failure(IllegalStateException("Correo o contraseña incorrectos"))
         }
+        sessionActive = true
         _state.value = if (profiles.isEmpty()) {
             AuthState.NeedsSetup
         } else {
@@ -67,8 +80,10 @@ class InMemoryAuthRepository : AuthRepository {
 
     private fun List<NewProfile>.toIdentity(): List<Profile> = map { it.toIdentity() }
 
-    override fun logOut() {
-        // Keep `account` and `profiles` around so re-login works within the same process session.
+    override suspend fun logOut() {
+        // Keep `account` and `profiles` around so re-login works within the same process session;
+        // only the session flag drops, matching the persisted store's logout.
+        sessionActive = false
         _state.value = AuthState.LoggedOut
     }
 }

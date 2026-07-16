@@ -38,6 +38,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jecsdev.papipuntos.designsystem.component.LabeledDivider
 import com.jecsdev.papipuntos.designsystem.component.PapiPuntosTextField
 import com.jecsdev.papipuntos.designsystem.component.PrimaryActionButton
@@ -66,7 +67,7 @@ fun LoginScreen(
     var mode by remember { mutableStateOf(LoginMode.Login) }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    // TODO(stage-2): surface viewModel.error on the login form
+    val error by viewModel.error.collectAsStateWithLifecycle()
     val submit = {
         if (mode == LoginMode.SignUp) {
             viewModel.signUp(email, password)
@@ -79,8 +80,15 @@ fun LoginScreen(
         mode = mode,
         email = email,
         password = password,
-        onModeChange = { mode = it },
-        onEmailChange = { email = it },
+        error = error,
+        // Switching between login and sign-up drops any stale error from the other mode.
+        onModeChange = {
+            mode = it
+            viewModel.clearError()
+        },
+        // Email is trimmed + lowercased as typed so casing or stray spaces never cause a
+        // sign-up/login mismatch. The password is left untouched: it is a case-sensitive secret.
+        onEmailChange = { email = it.trim().lowercase() },
         onPasswordChange = { password = it },
         onSubmit = submit,
         // Social sign-in is out of scope for stage 1.
@@ -97,6 +105,7 @@ fun LoginScreenContent(
     email: String,
     password: String,
     modifier: Modifier = Modifier,
+    error: String? = null,
     onModeChange: (LoginMode) -> Unit = {},
     onEmailChange: (String) -> Unit = {},
     onPasswordChange: (String) -> Unit = {},
@@ -166,6 +175,17 @@ fun LoginScreenContent(
                 MaterialTheme.colorScheme.primary,
             ),
         )
+
+        // Auth failures (e.g. wrong password) surface here; nothing renders while error is null.
+        if (error != null) {
+            Spacer(Modifier.height(12.dp))
+            Text(
+                text = error,
+                style = PapiPuntosTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                textAlign = TextAlign.Center,
+            )
+        }
 
         Spacer(Modifier.height(16.dp))
         LabeledDivider(text = "o continúa con")
@@ -247,6 +267,19 @@ private fun LoginScreenPreview() {
             mode = LoginMode.Login,
             email = "",
             password = "",
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun LoginScreenErrorPreview() {
+    PapiPuntosTheme {
+        LoginScreenContent(
+            mode = LoginMode.Login,
+            email = "sofia@email.com",
+            password = "12345",
+            error = "Correo o contraseña incorrectos",
         )
     }
 }

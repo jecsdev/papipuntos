@@ -13,17 +13,30 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * Room-backed auth store (stage 2). Passwords and PINs are persisted only as PBKDF2
- * hashes, never in plain text. The session is NOT auto-restored on cold start — that
- * lands in stage 3 — so the flow always starts LoggedOut even if data exists on disk.
+ * Room-backed auth store (stage 3). Passwords and PINs are persisted only as PBKDF2
+ * hashes, never in plain text. On cold start the flow begins in [AuthState.Loading]
+ * and [bootstrap] restores it: an account with a live session skips the password
+ * screen and lands on the profile picker; logout clears the flag so the password is
+ * required again. The per-profile PIN is always re-entered — it is never remembered.
  */
 class RoomAuthRepository(
     private val dao: AuthDao,
     private val hasher: PasswordHasher,
 ) : AuthRepository {
 
-    private val _state = MutableStateFlow<AuthState>(AuthState.LoggedOut)
+    private val _state = MutableStateFlow<AuthState>(AuthState.Loading)
     override val state: StateFlow<AuthState> = _state.asStateFlow()
+
+    override suspend fun bootstrap() {
+        val account = dao.getAccount()
+        _state.value = when {
+            account == null || !account.sessionActive -> AuthState.LoggedOut
+            else -> {
+                val profiles = dao.getProfiles().toDomain()
+                if (profiles.isEmpty()) AuthState.NeedsSetup else AuthState.ProfileSelection(profiles)
+            }
+        }
+    }
 
     override suspend fun signUp(email: String, password: String): Result<Unit> {
         if (email.isBlank() || password.isBlank()) {
@@ -33,8 +46,15 @@ class RoomAuthRepository(
             return Result.failure(IllegalStateException("Ya existe una cuenta con este correo"))
         }
         val hashed = hasher.hash(password)
+        // A fresh sign-up opens a live session so onboarding (profile setup) survives a restart.
+        // Email is trimmed + lowercased so casing or stray spaces can't split one identity into two accounts.
         dao.upsertAccount(
-            AccountEntity(email = email, passwordHash = hashed.hashHex, passwordSalt = hashed.saltHex),
+            AccountEntity(
+                email = email.trim().lowercase(),
+                passwordHash = hashed.hashHex,
+                passwordSalt = hashed.saltHex,
+                sessionActive = true,
+            ),
         )
         _state.value = AuthState.NeedsSetup
         return Result.success(Unit)
@@ -42,12 +62,14 @@ class RoomAuthRepository(
 
     override suspend fun logIn(email: String, password: String): Result<Unit> {
         val account = dao.getAccount()
+        // Compare against the trimmed + lowercased form so casing or stray spaces still log in.
         if (account == null ||
-            account.email != email ||
+            account.email != email.trim().lowercase() ||
             !hasher.verify(password, account.passwordSalt, account.passwordHash)
         ) {
             return Result.failure(IllegalStateException("Correo o contraseña incorrectos"))
         }
+        dao.setSessionActive(true)
         val profiles = dao.getProfiles().toDomain()
         _state.value = if (profiles.isEmpty()) AuthState.NeedsSetup else AuthState.ProfileSelection(profiles)
         return Result.success(Unit)
@@ -69,8 +91,10 @@ class RoomAuthRepository(
         return Result.success(Unit)
     }
 
-    override fun logOut() {
-        // Data stays on disk; only the in-memory session resets.
+    override suspend fun logOut() {
+        // Clear the persisted session so the next cold start requires the password again.
+        // Account and profiles stay on disk untouched.
+        dao.setSessionActive(false)
         _state.value = AuthState.LoggedOut
     }
 
