@@ -4,6 +4,7 @@ import com.jecsdev.papipuntos.data.auth.AuthRepository
 import com.jecsdev.papipuntos.data.auth.RoomAuthRepository
 import com.jecsdev.papipuntos.data.db.AuthDatabase
 import com.jecsdev.papipuntos.data.db.buildAuthDatabase
+import com.jecsdev.papipuntos.data.remote.createPapiPuntosSupabaseClient
 import com.jecsdev.papipuntos.data.security.PasswordHasher
 import com.jecsdev.papipuntos.data.security.Pbkdf2PasswordHasher
 import org.koin.dsl.module
@@ -17,4 +18,6 @@ val dataModule = module {
     single { get<AuthDatabase>().authDao() }
     single<PasswordHasher> { Pbkdf2PasswordHasher() }
     single<AuthRepository> { RoomAuthRepository(get(), get()) }
+    // Shared Supabase client for remote/social sign-in (unused until the flow is wired).
+    single { createPapiPuntosSupabaseClient() }
 }

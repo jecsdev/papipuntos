@@ -20,6 +20,8 @@ ksp = "2.3.10"
 sqlite = "2.7.0"
 kotlincryptoMacs = "0.8.0"
 kotlincryptoRandom = "0.6.0"
+supabase = "3.7.0-beta-1"
+ktor = "3.5.1"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -48,6 +50,9 @@ room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
 kotlincrypto-hmac-sha2 = { module = "org.kotlincrypto.macs:hmac-sha2", version.ref = "kotlincryptoMacs" }
 kotlincrypto-crypto-rand = { module = "org.kotlincrypto.random:crypto-rand", version.ref = "kotlincryptoRandom" }
+supabase-auth = { module = "io.github.jan-tennert.supabase:auth-kt", version.ref = "supabase" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
