@@ -91,9 +91,9 @@ fun LoginScreen(
         onEmailChange = { email = it.trim().lowercase() },
         onPasswordChange = { password = it },
         onSubmit = submit,
-        // Social sign-in is out of scope for stage 1.
-        onContinueWithGoogle = {},
-        onContinueWithApple = {},
+        // Opens the provider's consent page; the session returns through the deep link.
+        onContinueWithGoogle = { viewModel.signInWithGoogle() },
+        onContinueWithApple = { viewModel.signInWithApple() },
         modifier = modifier,
     )
 }

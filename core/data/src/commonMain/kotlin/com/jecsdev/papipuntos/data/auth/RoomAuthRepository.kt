@@ -8,6 +8,12 @@ import com.jecsdev.papipuntos.model.AuthState
 import com.jecsdev.papipuntos.model.NewProfile
 import com.jecsdev.papipuntos.model.Player
 import com.jecsdev.papipuntos.model.Profile
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.providers.Apple
+import io.github.jan.supabase.auth.providers.Google
+import io.github.jan.supabase.auth.providers.OAuthProvider
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,6 +28,7 @@ import kotlinx.coroutines.flow.asStateFlow
 class RoomAuthRepository(
     private val dao: AuthDao,
     private val hasher: PasswordHasher,
+    private val supabase: SupabaseClient,
 ) : AuthRepository {
 
     private val _state = MutableStateFlow<AuthState>(AuthState.Loading)
@@ -74,6 +81,26 @@ class RoomAuthRepository(
         _state.value = if (profiles.isEmpty()) AuthState.NeedsSetup else AuthState.ProfileSelection(profiles)
         return Result.success(Unit)
     }
+
+    override suspend fun signInWithGoogle(): Result<Unit> = startOAuth(Google, "Google")
+
+    override suspend fun signInWithApple(): Result<Unit> = startOAuth(Apple, "Apple")
+
+    /**
+     * Only launches the provider's consent page. [AuthState] is deliberately untouched here:
+     * the session lands later via the deep link, and reacting to it is where local account
+     * linking will happen.
+     */
+    private suspend fun startOAuth(provider: OAuthProvider, label: String): Result<Unit> =
+        try {
+            supabase.auth.signInWith(provider)
+            Result.success(Unit)
+        } catch (cancellation: CancellationException) {
+            // Never swallow cancellation — it must keep propagating up the coroutine.
+            throw cancellation
+        } catch (error: Exception) {
+            Result.failure(IllegalStateException("No se pudo iniciar sesión con $label"))
+        }
 
     override suspend fun saveProfiles(papi: NewProfile, mami: NewProfile): Result<Unit> {
         dao.upsertProfiles(listOf(papi.toEntity(), mami.toEntity()))

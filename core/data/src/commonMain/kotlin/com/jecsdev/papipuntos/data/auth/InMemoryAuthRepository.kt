@@ -60,6 +60,13 @@ class InMemoryAuthRepository : AuthRepository {
         return Result.success(Unit)
     }
 
+    // The double has no remote backend, so social sign-in always fails here.
+    override suspend fun signInWithGoogle(): Result<Unit> =
+        Result.failure(IllegalStateException("No se pudo iniciar sesión con Google"))
+
+    override suspend fun signInWithApple(): Result<Unit> =
+        Result.failure(IllegalStateException("No se pudo iniciar sesión con Apple"))
+
     override suspend fun saveProfiles(papi: NewProfile, mami: NewProfile): Result<Unit> {
         profiles = listOf(papi, mami)
         _state.value = AuthState.ProfileSelection(profiles.toIdentity())

@@ -14,6 +14,15 @@ interface AuthRepository {
 
     suspend fun signUp(email: String, password: String): Result<Unit>
     suspend fun logIn(email: String, password: String): Result<Unit>
+
+    /**
+     * Opens the provider's consent page in the browser. These return as soon as the browser is
+     * launched — success here only means "the flow started". The session arrives later, through
+     * the `usify://auth-callback` deep link.
+     */
+    suspend fun signInWithGoogle(): Result<Unit>
+    suspend fun signInWithApple(): Result<Unit>
+
     suspend fun saveProfiles(papi: NewProfile, mami: NewProfile): Result<Unit>
     suspend fun unlockProfile(player: Player, pin: String): Result<Unit>
     suspend fun logOut()

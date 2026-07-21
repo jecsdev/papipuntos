@@ -44,6 +44,20 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
             .onFailure { _error.value = it.message }
     }
 
+    // These only open the browser. The session comes back through the deep link, so there is
+    // no success state to react to here — only a failure worth showing.
+    fun signInWithGoogle() = viewModelScope.launch {
+        repository.signInWithGoogle()
+            .onSuccess { _error.value = null }
+            .onFailure { _error.value = it.message }
+    }
+
+    fun signInWithApple() = viewModelScope.launch {
+        repository.signInWithApple()
+            .onSuccess { _error.value = null }
+            .onFailure { _error.value = it.message }
+    }
+
     fun saveProfiles(papi: NewProfile, mami: NewProfile) = viewModelScope.launch {
         repository.saveProfiles(papi, mami)
             .onSuccess { _error.value = null }
