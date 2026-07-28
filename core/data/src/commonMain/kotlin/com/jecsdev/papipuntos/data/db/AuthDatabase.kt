@@ -13,7 +13,7 @@ import kotlinx.coroutines.Dispatchers
 /** File name of the local auth SQLite database on every platform. */
 const val AUTH_DB_FILE = "papipuntos_auth.db"
 
-@Database(entities = [AccountEntity::class, ProfileEntity::class], version = 2)
+@Database(entities = [AccountEntity::class, ProfileEntity::class], version = 3)
 @ConstructedBy(AuthDatabaseConstructor::class)
 abstract class AuthDatabase : RoomDatabase() {
     abstract fun authDao(): AuthDao
@@ -24,6 +24,30 @@ abstract class AuthDatabase : RoomDatabase() {
 val MIGRATION_1_2: Migration = object : Migration(1, 2) {
     override fun migrate(connection: SQLiteConnection) {
         connection.execSQL("ALTER TABLE account ADD COLUMN sessionActive INTEGER NOT NULL DEFAULT 0")
+    }
+}
+
+// v2 -> v3 makes the password columns nullable (remote Google/Apple accounts have none)
+// and adds remoteUserId. SQLite can't relax NOT NULL in place, so the table is rebuilt.
+// The new table intentionally omits the DEFAULT that MIGRATION_1_2 gave sessionActive, so
+// it matches the Room-generated v3 schema (the Kotlin default is not a SQL default).
+val MIGRATION_2_3: Migration = object : Migration(2, 3) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL(
+            "CREATE TABLE account_new (" +
+                "id INTEGER NOT NULL PRIMARY KEY, " +
+                "email TEXT NOT NULL, " +
+                "passwordHash TEXT, " +
+                "passwordSalt TEXT, " +
+                "sessionActive INTEGER NOT NULL, " +
+                "remoteUserId TEXT)",
+        )
+        connection.execSQL(
+            "INSERT INTO account_new (id, email, passwordHash, passwordSalt, sessionActive) " +
+                "SELECT id, email, passwordHash, passwordSalt, sessionActive FROM account",
+        )
+        connection.execSQL("DROP TABLE account")
+        connection.execSQL("ALTER TABLE account_new RENAME TO account")
     }
 }
 
@@ -41,7 +65,7 @@ expect object AuthDatabaseConstructor : RoomDatabaseConstructor<AuthDatabase> {
  */
 fun buildAuthDatabase(builder: RoomDatabase.Builder<AuthDatabase>): AuthDatabase =
     builder
-        .addMigrations(MIGRATION_1_2)
+        .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
         .setDriver(BundledSQLiteDriver())
         .setQueryCoroutineContext(Dispatchers.Default)
         .build()

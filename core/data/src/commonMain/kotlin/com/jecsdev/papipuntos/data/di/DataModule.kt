@@ -7,6 +7,10 @@ import com.jecsdev.papipuntos.data.db.buildAuthDatabase
 import com.jecsdev.papipuntos.data.remote.papiPuntosSupabaseClient
 import com.jecsdev.papipuntos.data.security.PasswordHasher
 import com.jecsdev.papipuntos.data.security.Pbkdf2PasswordHasher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 /**
@@ -19,5 +23,8 @@ val dataModule = module {
     single<PasswordHasher> { Pbkdf2PasswordHasher() }
     // The same instance the Android entry point uses to handle the OAuth redirect.
     single { papiPuntosSupabaseClient }
-    single<AuthRepository> { RoomAuthRepository(get(), get(), get()) }
+    // App-lifetime scope: the repository observes the Supabase session on it for as long as
+    // the process lives (SupervisorJob so one failure doesn't tear the whole scope down).
+    single(named("appScope")) { CoroutineScope(SupervisorJob() + Dispatchers.Default) }
+    single<AuthRepository> { RoomAuthRepository(get(), get(), get(), get(named("appScope"))) }
 }

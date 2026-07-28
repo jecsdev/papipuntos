@@ -5,7 +5,9 @@ import androidx.room.PrimaryKey
 
 /**
  * The single shared account. Only one row ever exists, so the primary key is a
- * fixed [id] of 0. Secrets are stored as PBKDF2 hash + salt, never in plain text.
+ * fixed [id] of 0. A local (email/password) account stores its secret as a PBKDF2
+ * hash + salt; a remote account signed in through Google/Apple has NO local password,
+ * so those columns are null and [remoteUserId] holds the Supabase user id instead.
  * [sessionActive] persists whether the account is currently logged in, so a cold
  * start can skip the password screen (true) or require it again after logout (false).
  */
@@ -13,9 +15,10 @@ import androidx.room.PrimaryKey
 data class AccountEntity(
     @PrimaryKey val id: Int = SINGLE_ROW_ID,
     val email: String,
-    val passwordHash: String,
-    val passwordSalt: String,
+    val passwordHash: String? = null,
+    val passwordSalt: String? = null,
     val sessionActive: Boolean = false,
+    val remoteUserId: String? = null,
 ) {
     companion object {
         const val SINGLE_ROW_ID = 0
