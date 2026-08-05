@@ -22,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jecsdev.papipuntos.designsystem.component.PrimaryActionButton
 import com.jecsdev.papipuntos.designsystem.component.SectionHeader
@@ -33,7 +34,6 @@ import com.jecsdev.papipuntos.feature.scoreboard.component.ScoreboardBottomBar
 import com.jecsdev.papipuntos.feature.scoreboard.component.ScoreboardHeader
 import com.jecsdev.papipuntos.feature.scoreboard.component.ScoreboardTab
 import com.jecsdev.papipuntos.model.Player
-import androidx.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
 /** Production entry point: pulls state from the ViewModel and drives [ScoreboardScreenContent]. */

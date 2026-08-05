@@ -26,16 +26,15 @@ const val AUTH_CALLBACK_HOST = "auth-callback"
  */
 val papiPuntosSupabaseClient: SupabaseClient by lazy { createPapiPuntosSupabaseClient() }
 
-private fun createPapiPuntosSupabaseClient(): SupabaseClient =
-    createSupabaseClient(
-        supabaseUrl = SupabaseConfig.URL,
-        supabaseKey = SupabaseConfig.ANON_KEY,
-    ) {
-        install(Auth) {
-            scheme = AUTH_CALLBACK_SCHEME
-            host = AUTH_CALLBACK_HOST
-            // PKCE instead of the default implicit flow: the redirect carries a short-lived code
-            // that is exchanged for the session, rather than tokens riding in the URL fragment.
-            flowType = FlowType.PKCE
-        }
+private fun createPapiPuntosSupabaseClient(): SupabaseClient = createSupabaseClient(
+    supabaseUrl = SupabaseConfig.URL,
+    supabaseKey = SupabaseConfig.ANON_KEY,
+) {
+    install(Auth) {
+        scheme = AUTH_CALLBACK_SCHEME
+        host = AUTH_CALLBACK_HOST
+        // PKCE instead of the default implicit flow: the redirect carries a short-lived code
+        // that is exchanged for the session, rather than tokens riding in the URL fragment.
+        flowType = FlowType.PKCE
     }
+}

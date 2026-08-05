@@ -3,7 +3,11 @@ package com.jecsdev.papipuntos.feature.profile
 import com.jecsdev.papipuntos.feature.profile.model.PlanFeature
 
 /** Billing cycles for the premium plan, with the copy shown in the price block. */
-enum class BillingCycle(val label: String, val price: String, val period: String) {
+enum class BillingCycle(
+    val label: String,
+    val price: String,
+    val period: String,
+) {
     Monthly("Mensual", "$3.99", "/mes"),
     Yearly("Anual · -37%", "$29.99", "/año"),
 }

@@ -12,8 +12,14 @@ interface AuthRepository {
     /** Cold-start restore: reads persisted state and moves off [AuthState.Loading]. */
     suspend fun bootstrap()
 
-    suspend fun signUp(email: String, password: String): Result<Unit>
-    suspend fun logIn(email: String, password: String): Result<Unit>
+    suspend fun signUp(
+        email: String,
+        password: String,
+    ): Result<Unit>
+    suspend fun logIn(
+        email: String,
+        password: String,
+    ): Result<Unit>
 
     /**
      * Opens the provider's consent page in the browser. These return as soon as the browser is
@@ -23,7 +29,13 @@ interface AuthRepository {
     suspend fun signInWithGoogle(): Result<Unit>
     suspend fun signInWithApple(): Result<Unit>
 
-    suspend fun saveProfiles(papi: NewProfile, mami: NewProfile): Result<Unit>
-    suspend fun unlockProfile(player: Player, pin: String): Result<Unit>
+    suspend fun saveProfiles(
+        papi: NewProfile,
+        mami: NewProfile,
+    ): Result<Unit>
+    suspend fun unlockProfile(
+        player: Player,
+        pin: String,
+    ): Result<Unit>
     suspend fun logOut()
 }

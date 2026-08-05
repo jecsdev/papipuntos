@@ -32,13 +32,19 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
 
     // Each action clears the error on success so a stale message from an earlier
     // step (e.g. a failed sign-up) never bleeds into the next screen's UI.
-    fun signUp(email: String, password: String) = viewModelScope.launch {
+    fun signUp(
+        email: String,
+        password: String,
+    ) = viewModelScope.launch {
         repository.signUp(email, password)
             .onSuccess { _error.value = null }
             .onFailure { _error.value = it.message }
     }
 
-    fun logIn(email: String, password: String) = viewModelScope.launch {
+    fun logIn(
+        email: String,
+        password: String,
+    ) = viewModelScope.launch {
         repository.logIn(email, password)
             .onSuccess { _error.value = null }
             .onFailure { _error.value = it.message }
@@ -58,12 +64,18 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
             .onFailure { _error.value = it.message }
     }
 
-    fun saveProfiles(papi: NewProfile, mami: NewProfile) = viewModelScope.launch {
+    fun saveProfiles(
+        papi: NewProfile,
+        mami: NewProfile,
+    ) = viewModelScope.launch {
         repository.saveProfiles(papi, mami)
             .onSuccess { _error.value = null }
     }
 
-    fun unlockProfile(player: Player, pin: String) = viewModelScope.launch {
+    fun unlockProfile(
+        player: Player,
+        pin: String,
+    ) = viewModelScope.launch {
         repository.unlockProfile(player, pin)
             .onSuccess { _error.value = null }
             .onFailure { _error.value = it.message }

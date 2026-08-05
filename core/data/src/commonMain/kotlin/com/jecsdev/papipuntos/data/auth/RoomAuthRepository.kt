@@ -64,7 +64,10 @@ class RoomAuthRepository(
         }
     }
 
-    override suspend fun signUp(email: String, password: String): Result<Unit> {
+    override suspend fun signUp(
+        email: String,
+        password: String,
+    ): Result<Unit> {
         if (email.isBlank() || password.isBlank()) {
             return Result.failure(IllegalArgumentException("Ingresa correo y contraseña"))
         }
@@ -86,7 +89,10 @@ class RoomAuthRepository(
         return Result.success(Unit)
     }
 
-    override suspend fun logIn(email: String, password: String): Result<Unit> {
+    override suspend fun logIn(
+        email: String,
+        password: String,
+    ): Result<Unit> {
         val account = dao.getAccount()
         val hash = account?.passwordHash
         val salt = account?.passwordSalt
@@ -94,7 +100,8 @@ class RoomAuthRepository(
         // A remote (Google/Apple) account has no local password — hash/salt are null — so
         // password login simply fails for it, with the same generic message.
         if (account == null ||
-            hash == null || salt == null ||
+            hash == null ||
+            salt == null ||
             account.email != email.trim().lowercase() ||
             !hasher.verify(password, salt, hash)
         ) {
@@ -114,16 +121,18 @@ class RoomAuthRepository(
      * Only launches the provider's consent page. [AuthState] is deliberately untouched here:
      * the session lands later via the deep link and is handled in [linkRemoteSession].
      */
-    private suspend fun startOAuth(provider: OAuthProvider, label: String): Result<Unit> =
-        try {
-            supabase.auth.signInWith(provider)
-            Result.success(Unit)
-        } catch (cancellation: CancellationException) {
-            // Never swallow cancellation — it must keep propagating up the coroutine.
-            throw cancellation
-        } catch (error: Exception) {
-            Result.failure(IllegalStateException("No se pudo iniciar sesión con $label"))
-        }
+    private suspend fun startOAuth(
+        provider: OAuthProvider,
+        label: String,
+    ): Result<Unit> = try {
+        supabase.auth.signInWith(provider)
+        Result.success(Unit)
+    } catch (cancellation: CancellationException) {
+        // Never swallow cancellation — it must keep propagating up the coroutine.
+        throw cancellation
+    } catch (error: Exception) {
+        Result.failure(IllegalStateException("No se pudo iniciar sesión con $label"))
+    }
 
     /**
      * A Supabase session became active (fresh Google/Apple sign-in, or a persisted remote
@@ -150,13 +159,19 @@ class RoomAuthRepository(
         _state.value = if (profiles.isEmpty()) AuthState.NeedsSetup else AuthState.ProfileSelection(profiles)
     }
 
-    override suspend fun saveProfiles(papi: NewProfile, mami: NewProfile): Result<Unit> {
+    override suspend fun saveProfiles(
+        papi: NewProfile,
+        mami: NewProfile,
+    ): Result<Unit> {
         dao.upsertProfiles(listOf(papi.toEntity(), mami.toEntity()))
         _state.value = AuthState.ProfileSelection(dao.getProfiles().toDomain())
         return Result.success(Unit)
     }
 
-    override suspend fun unlockProfile(player: Player, pin: String): Result<Unit> {
+    override suspend fun unlockProfile(
+        player: Player,
+        pin: String,
+    ): Result<Unit> {
         val profile = dao.getProfile(player.name)
             ?: return Result.failure(IllegalStateException("Perfil no encontrado"))
         if (!hasher.verify(pin, profile.pinSalt, profile.pinHash)) {
@@ -193,11 +208,9 @@ class RoomAuthRepository(
         )
     }
 
-    private fun List<ProfileEntity>.toDomain(): List<Profile> =
-        map { it.toDomain() }.sortedBy { it.player.ordinal }
+    private fun List<ProfileEntity>.toDomain(): List<Profile> = map { it.toDomain() }.sortedBy { it.player.ordinal }
 
     // Profiles are read back as identity only; the PIN never leaves the store. Unlocking
     // goes through unlockProfile(), which verifies the hash instead of exposing the PIN.
-    private fun ProfileEntity.toDomain(): Profile =
-        Profile(player = Player.valueOf(player), name = name, emoji = emoji)
+    private fun ProfileEntity.toDomain(): Profile = Profile(player = Player.valueOf(player), name = name, emoji = emoji)
 }

@@ -4,7 +4,10 @@ import org.kotlincrypto.macs.hmac.sha2.HmacSHA256
 import org.kotlincrypto.random.CryptoRand
 
 /** A derived secret plus the random salt it was derived with, both hex-encoded. */
-data class HashedSecret(val saltHex: String, val hashHex: String)
+data class HashedSecret(
+    val saltHex: String,
+    val hashHex: String,
+)
 
 /** Hashes and verifies passwords and PINs. Implementations must never store plain text. */
 interface PasswordHasher {
@@ -12,7 +15,11 @@ interface PasswordHasher {
     fun hash(raw: String): HashedSecret
 
     /** True if [raw] re-derives to [hashHex] under [saltHex]. Constant-time on the digest. */
-    fun verify(raw: String, saltHex: String, hashHex: String): Boolean
+    fun verify(
+        raw: String,
+        saltHex: String,
+        hashHex: String,
+    ): Boolean
 }
 
 /**
@@ -33,7 +40,11 @@ class Pbkdf2PasswordHasher(
         return HashedSecret(saltHex = salt.toHex(), hashHex = derived.toHex())
     }
 
-    override fun verify(raw: String, saltHex: String, hashHex: String): Boolean {
+    override fun verify(
+        raw: String,
+        saltHex: String,
+        hashHex: String,
+    ): Boolean {
         val salt = saltHex.hexToBytes()
         val expected = hashHex.hexToBytes()
         val derived = pbkdf2HmacSha256(raw.encodeToByteArray(), salt, iterations, expected.size)
@@ -53,7 +64,12 @@ private const val H_LEN = 32 // HMAC-SHA256 output size in bytes
  * RFC 2898 PBKDF2 with HMAC-SHA256 as the PRF. Internal so tests can check it against the
  * published RFC test vectors — a round-trip alone would pass even a consistently-wrong loop.
  */
-internal fun pbkdf2HmacSha256(password: ByteArray, salt: ByteArray, iterations: Int, dkLen: Int): ByteArray {
+internal fun pbkdf2HmacSha256(
+    password: ByteArray,
+    salt: ByteArray,
+    iterations: Int,
+    dkLen: Int,
+): ByteArray {
     val prf = HmacSHA256(password)
     val blocks = (dkLen + H_LEN - 1) / H_LEN
     val output = ByteArray(blocks * H_LEN)
@@ -81,11 +97,9 @@ private fun Int.toBigEndianBytes(): ByteArray = byteArrayOf(
     this.toByte(),
 )
 
-internal fun ByteArray.toHex(): String =
-    joinToString("") { (it.toInt() and 0xFF).toString(16).padStart(2, '0') }
+internal fun ByteArray.toHex(): String = joinToString("") { (it.toInt() and 0xFF).toString(16).padStart(2, '0') }
 
-private fun String.hexToBytes(): ByteArray =
-    ByteArray(length / 2) { substring(it * 2, it * 2 + 2).toInt(16).toByte() }
+private fun String.hexToBytes(): ByteArray = ByteArray(length / 2) { substring(it * 2, it * 2 + 2).toInt(16).toByte() }
 
 /** Compares all bytes without short-circuiting so timing does not leak how much matched. */
 private fun ByteArray.constantTimeEquals(other: ByteArray): Boolean {

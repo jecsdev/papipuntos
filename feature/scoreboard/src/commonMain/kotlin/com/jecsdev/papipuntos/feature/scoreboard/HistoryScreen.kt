@@ -30,7 +30,10 @@ import com.jecsdev.papipuntos.feature.scoreboard.model.ActionEntry
 import com.jecsdev.papipuntos.model.Player
 
 /** The three filter tabs over the logged actions: everyone, only Papi, only Mami. */
-enum class HistoryFilter(val label: String, val player: Player?) {
+enum class HistoryFilter(
+    val label: String,
+    val player: Player?,
+) {
     All("Todos", null),
     Papi("💙 Papi", Player.Papi),
     Mami("💗 Mami", Player.Mami),

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -27,7 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -49,7 +47,10 @@ import com.jecsdev.papipuntos.designsystem.theme.PapiPuntosTheme
 import org.koin.compose.viewmodel.koinViewModel
 
 /** Auth entry modes shown in the segmented switch. */
-enum class LoginMode(val label: String, val cta: String) {
+enum class LoginMode(
+    val label: String,
+    val cta: String,
+) {
     Login("Iniciar sesión", "Entrar 💖"),
     SignUp("Crear cuenta", "Crear cuenta 💖"),
 }

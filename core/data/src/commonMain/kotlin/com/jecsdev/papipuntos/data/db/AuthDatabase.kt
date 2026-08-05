@@ -63,9 +63,8 @@ expect object AuthDatabaseConstructor : RoomDatabaseConstructor<AuthDatabase> {
  * Uses [Dispatchers.Default] because Dispatchers.IO is not available on Kotlin/Native;
  * the auth store is tiny and rarely touched, so the default pool is fine here.
  */
-fun buildAuthDatabase(builder: RoomDatabase.Builder<AuthDatabase>): AuthDatabase =
-    builder
-        .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
-        .setDriver(BundledSQLiteDriver())
-        .setQueryCoroutineContext(Dispatchers.Default)
-        .build()
+fun buildAuthDatabase(builder: RoomDatabase.Builder<AuthDatabase>): AuthDatabase = builder
+    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+    .setDriver(BundledSQLiteDriver())
+    .setQueryCoroutineContext(Dispatchers.Default)
+    .build()

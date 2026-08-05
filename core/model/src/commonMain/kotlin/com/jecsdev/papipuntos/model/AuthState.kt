@@ -15,5 +15,8 @@ sealed interface AuthState {
     data class ProfileSelection(val profiles: List<Profile>) : AuthState
 
     /** A profile unlocked its PIN: show the main app for [current]. */
-    data class Active(val current: Profile, val profiles: List<Profile>) : AuthState
+    data class Active(
+        val current: Profile,
+        val profiles: List<Profile>,
+    ) : AuthState
 }

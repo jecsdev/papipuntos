@@ -44,9 +44,7 @@ internal val LocalPapiPuntosShapes = staticCompositionLocalOf { DefaultPapiPunto
  * - Custom:    `PapiPuntosTheme.colors`, `PapiPuntosTheme.shapes`
  */
 @Composable
-fun PapiPuntosTheme(
-    content: @Composable () -> Unit,
-) {
+fun PapiPuntosTheme(content: @Composable () -> Unit) {
     CompositionLocalProvider(
         LocalPapiPuntosColors provides LightPapiPuntosColors,
         LocalPapiPuntosShapes provides DefaultPapiPuntosShapes,
@@ -63,14 +61,18 @@ fun PapiPuntosTheme(
 /** Accessor for the custom tokens, mirroring the `MaterialTheme` object style. */
 object PapiPuntosTheme {
     val colors: PapiPuntosColors
-        @Composable @ReadOnlyComposable get() = LocalPapiPuntosColors.current
+        @Composable @ReadOnlyComposable
+        get() = LocalPapiPuntosColors.current
 
     val shapes: PapiPuntosShapes
-        @Composable @ReadOnlyComposable get() = LocalPapiPuntosShapes.current
+        @Composable @ReadOnlyComposable
+        get() = LocalPapiPuntosShapes.current
 
     val typography: Typography
-        @Composable @ReadOnlyComposable get() = MaterialTheme.typography
+        @Composable @ReadOnlyComposable
+        get() = MaterialTheme.typography
 
     val materialShapes: Shapes
-        @Composable @ReadOnlyComposable get() = MaterialTheme.shapes
+        @Composable @ReadOnlyComposable
+        get() = MaterialTheme.shapes
 }

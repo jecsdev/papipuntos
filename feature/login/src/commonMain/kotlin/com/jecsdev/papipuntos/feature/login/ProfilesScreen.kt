@@ -376,7 +376,11 @@ private fun PinEntryContent(
 }
 
 @Composable
-private fun PinDot(filled: Boolean, error: Boolean, accent: Color) {
+private fun PinDot(
+    filled: Boolean,
+    error: Boolean,
+    accent: Color,
+) {
     val fill = when {
         error -> MaterialTheme.colorScheme.error
         filled -> accent

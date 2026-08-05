@@ -32,7 +32,10 @@ class InMemoryAuthRepository : AuthRepository {
         }
     }
 
-    override suspend fun signUp(email: String, password: String): Result<Unit> {
+    override suspend fun signUp(
+        email: String,
+        password: String,
+    ): Result<Unit> {
         if (email.isBlank() || password.isBlank()) {
             return Result.failure(IllegalArgumentException("Ingresa correo y contraseña"))
         }
@@ -46,9 +49,15 @@ class InMemoryAuthRepository : AuthRepository {
         return Result.success(Unit)
     }
 
-    override suspend fun logIn(email: String, password: String): Result<Unit> {
+    override suspend fun logIn(
+        email: String,
+        password: String,
+    ): Result<Unit> {
         val currentAccount = account
-        if (currentAccount == null || currentAccount.email != email.trim().lowercase() || currentAccount.password != password) {
+        if (currentAccount == null ||
+            currentAccount.email != email.trim().lowercase() ||
+            currentAccount.password != password
+        ) {
             return Result.failure(IllegalStateException("Correo o contraseña incorrectos"))
         }
         sessionActive = true
@@ -67,13 +76,19 @@ class InMemoryAuthRepository : AuthRepository {
     override suspend fun signInWithApple(): Result<Unit> =
         Result.failure(IllegalStateException("No se pudo iniciar sesión con Apple"))
 
-    override suspend fun saveProfiles(papi: NewProfile, mami: NewProfile): Result<Unit> {
+    override suspend fun saveProfiles(
+        papi: NewProfile,
+        mami: NewProfile,
+    ): Result<Unit> {
         profiles = listOf(papi, mami)
         _state.value = AuthState.ProfileSelection(profiles.toIdentity())
         return Result.success(Unit)
     }
 
-    override suspend fun unlockProfile(player: Player, pin: String): Result<Unit> {
+    override suspend fun unlockProfile(
+        player: Player,
+        pin: String,
+    ): Result<Unit> {
         val profile = profiles.firstOrNull { it.player == player }
             ?: return Result.failure(IllegalStateException("Perfil no encontrado"))
         if (profile.pin != pin) {
