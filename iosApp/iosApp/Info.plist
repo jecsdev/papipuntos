@@ -4,5 +4,20 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<!--
+	  OAuth redirect target: usify://auth-callback. Must stay in sync with the scheme/host in
+	  SupabaseClientProvider.kt and the Redirect URL registered in the Supabase dashboard.
+	-->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.jecsdev.papipuntos.auth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>usify</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

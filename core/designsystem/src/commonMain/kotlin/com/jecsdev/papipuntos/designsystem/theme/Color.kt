@@ -12,39 +12,39 @@ import androidx.compose.ui.graphics.Color
  */
 internal object PapiPuntosPalette {
     // Surfaces / base
-    val Canvas = Color(0xFFF6EFF7)      // --canvas
-    val Background = Color(0xFFFFFDFF)  // --background
-    val Foreground = Color(0xFF181928)  // --foreground
-    val Card = Color(0xFFFFFFFF)        // --card
-    val Muted = Color(0xFFF8F3F9)       // --muted
+    val Canvas = Color(0xFFF6EFF7) // --canvas
+    val Background = Color(0xFFFFFDFF) // --background
+    val Foreground = Color(0xFF181928) // --foreground
+    val Card = Color(0xFFFFFFFF) // --card
+    val Muted = Color(0xFFF8F3F9) // --muted
     val MutedForeground = Color(0xFF6E7083) // --muted-foreground
-    val Border = Color(0xFFECE5EE)      // --border
-    val Input = Color(0xFFEFE9F0)       // --input
+    val Border = Color(0xFFECE5EE) // --border
+    val Input = Color(0xFFEFE9F0) // --input
 
     // Brand roles
-    val Primary = Color(0xFFF996A6)         // --primary (coral, base of gradients)
+    val Primary = Color(0xFFF996A6) // --primary (coral, base of gradients)
     val PrimaryForeground = Color(0xFFFCFCFC) // --primary-foreground
-    val Secondary = Color(0xFFE2F5FF)       // --secondary
+    val Secondary = Color(0xFFE2F5FF) // --secondary
     val SecondaryForeground = Color(0xFF203A64) // --secondary-foreground
-    val Accent = Color(0xFFFFE4F2)          // --accent
+    val Accent = Color(0xFFFFE4F2) // --accent
     val AccentForeground = Color(0xFF641E2E) // --accent-foreground
-    val Destructive = Color(0xFFF94144)     // --destructive
+    val Destructive = Color(0xFFF94144) // --destructive
     val DestructiveForeground = Color(0xFFFCFCFC) // --destructive-foreground
 
     // Couple profiles
-    val Papi = Color(0xFF4BAEED)        // --papi (blue)
-    val PapiSoft = Color(0xFFD4F0FF)    // --papi-soft
-    val Mami = Color(0xFFFF8FAB)        // --mami (pink)
-    val MamiSoft = Color(0xFFFFE5E9)    // --mami-soft
+    val Papi = Color(0xFF4BAEED) // --papi (blue)
+    val PapiSoft = Color(0xFFD4F0FF) // --papi-soft
+    val Mami = Color(0xFFFF8FAB) // --mami (pink)
+    val MamiSoft = Color(0xFFFFE5E9) // --mami-soft
 
     // Premium / gamification accents. The mockup reaches for Tailwind's stock
     // amber (premium) and orange (streak flame) ramps rather than CSS variables.
-    val PremiumBg = Color(0xFFFFFBEB)     // amber-50
+    val PremiumBg = Color(0xFFFFFBEB) // amber-50
     val PremiumBorder = Color(0xFFFCD34D) // amber-300
-    val Premium = Color(0xFFFBBF24)       // amber-400
-    val PremiumIcon = Color(0xFFF59E0B)   // amber-500
-    val PremiumText = Color(0xFFB45309)   // amber-700
-    val Streak = Color(0xFFF97316)        // orange-500
+    val Premium = Color(0xFFFBBF24) // amber-400
+    val PremiumIcon = Color(0xFFF59E0B) // amber-500
+    val PremiumText = Color(0xFFB45309) // amber-700
+    val Streak = Color(0xFFF97316) // orange-500
 }
 
 /**

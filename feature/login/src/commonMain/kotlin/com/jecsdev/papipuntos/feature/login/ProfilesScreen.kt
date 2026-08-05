@@ -37,31 +37,32 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jecsdev.papipuntos.designsystem.component.PapiPuntosTopBar
 import com.jecsdev.papipuntos.designsystem.component.ProfileAvatar
 import com.jecsdev.papipuntos.designsystem.icon.PapiPuntosIcons
 import com.jecsdev.papipuntos.designsystem.theme.PapiPuntosTheme
 import com.jecsdev.papipuntos.model.Player
+import com.jecsdev.papipuntos.model.Profile
 import kotlinx.coroutines.delay
+import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * A selectable Netflix-style profile: the couple shares one account and each
- * member unlocks their side with a PIN. The [pin] here is throwaway demo data
- * (the mockup even hints it on screen); real PIN validation belongs to the
- * upcoming local-auth stage.
+ * member unlocks their side with a PIN. PIN validation is delegated to
+ * [AuthViewModel.unlockProfile], so this UI-only model no longer carries the pin.
  */
 data class ProfileOption(
     val player: Player,
     val name: String,
     val emoji: String,
     val roleLabel: String,
-    val pin: String,
 )
 
-/** Fake profiles feeding the preview and the stand-in navigation for now. */
+/** Fake profiles feeding the `@Preview`s only; production reads from [AuthViewModel.authState]. */
 val sampleProfiles: List<ProfileOption> = listOf(
-    ProfileOption(Player.Papi, "Mateo", "👨🏻", "Papi", pin = "1234"),
-    ProfileOption(Player.Mami, "Sofía", "👩🏻", "Mami", pin = "5678"),
+    ProfileOption(Player.Papi, "Mateo", "👨🏻", "Papi"),
+    ProfileOption(Player.Mami, "Sofía", "👩🏻", "Mami"),
 )
 
 private const val PIN_LENGTH = 4
@@ -69,29 +70,39 @@ private const val PIN_LENGTH = 4
 /**
  * Profile gate shown right after account login: pick who is using the app, then
  * enter that profile's PIN. Owns the selection + PIN entry state and delegates
- * the visuals to the stateless [ProfileSelectContent] / [PinEntryContent].
+ * the visuals to the stateless [ProfileSelectContent] / [PinEntryContent]. PIN
+ * validation goes through [AuthViewModel.unlockProfile]; on success the repo
+ * moves [com.jecsdev.papipuntos.model.AuthState] to `Active` and `App.kt` navigates on its own.
  */
 @Composable
 fun ProfilesScreen(
     modifier: Modifier = Modifier,
-    profiles: List<ProfileOption> = sampleProfiles,
-    onProfileUnlocked: (Player) -> Unit = {},
-    onChangeAccount: () -> Unit = {},
+    profiles: List<Profile>,
+    viewModel: AuthViewModel = koinViewModel(),
 ) {
+    val options = profiles.map {
+        ProfileOption(
+            player = it.player,
+            name = it.name,
+            emoji = it.emoji,
+            roleLabel = if (it.player == Player.Papi) "Papi" else "Mami",
+        )
+    }
     var selected by remember { mutableStateOf<ProfileOption?>(null) }
     val current = selected
 
     if (current == null) {
         ProfileSelectContent(
-            profiles = profiles,
+            profiles = options,
             onSelect = { selected = it },
-            onChangeAccount = onChangeAccount,
+            onChangeAccount = { viewModel.logOut() },
             modifier = modifier,
         )
     } else {
         // PIN state is scoped to the chosen profile: switching profiles resets it.
         var pin by remember(current) { mutableStateOf("") }
         var error by remember(current) { mutableStateOf(false) }
+        val vmError by viewModel.error.collectAsStateWithLifecycle()
 
         // On a wrong PIN, hold the red state briefly, then clear so they retry.
         LaunchedEffect(error) {
@@ -99,6 +110,14 @@ fun ProfilesScreen(
                 delay(500)
                 pin = ""
                 error = false
+                viewModel.clearError()
+            }
+        }
+
+        // Surfaces the repo's failure (wrong PIN) as the same red state the UI already drives locally.
+        LaunchedEffect(vmError) {
+            if (vmError != null) {
+                error = true
             }
         }
 
@@ -115,8 +134,7 @@ fun ProfilesScreen(
                         val next = pin + key
                         pin = next
                         if (next.length == PIN_LENGTH) {
-                            if (next == current.pin) onProfileUnlocked(current.player)
-                            else error = true
+                            viewModel.unlockProfile(current.player, next)
                         }
                     }
                 }
@@ -339,7 +357,7 @@ private fun PinEntryContent(
             }
         }
         Text(
-            text = if (error) "PIN incorrecto, intenta de nuevo" else "Pista: prueba con ${profile.pin}",
+            text = if (error) "PIN incorrecto, intenta de nuevo" else "Ingresa tu PIN de 4 dígitos",
             style = PapiPuntosTheme.typography.bodySmall.copy(
                 fontSize = 11.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -358,7 +376,11 @@ private fun PinEntryContent(
 }
 
 @Composable
-private fun PinDot(filled: Boolean, error: Boolean, accent: Color) {
+private fun PinDot(
+    filled: Boolean,
+    error: Boolean,
+    accent: Color,
+) {
     val fill = when {
         error -> MaterialTheme.colorScheme.error
         filled -> accent

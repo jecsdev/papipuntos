@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -27,7 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -38,6 +36,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jecsdev.papipuntos.designsystem.component.LabeledDivider
 import com.jecsdev.papipuntos.designsystem.component.PapiPuntosTextField
 import com.jecsdev.papipuntos.designsystem.component.PrimaryActionButton
@@ -45,34 +44,57 @@ import com.jecsdev.papipuntos.designsystem.component.SegmentedToggle
 import com.jecsdev.papipuntos.designsystem.component.SocialButton
 import com.jecsdev.papipuntos.designsystem.icon.PapiPuntosIcons
 import com.jecsdev.papipuntos.designsystem.theme.PapiPuntosTheme
+import org.koin.compose.viewmodel.koinViewModel
 
 /** Auth entry modes shown in the segmented switch. */
-enum class LoginMode(val label: String, val cta: String) {
+enum class LoginMode(
+    val label: String,
+    val cta: String,
+) {
     Login("Iniciar sesión", "Entrar 💖"),
     SignUp("Crear cuenta", "Crear cuenta 💖"),
 }
 
-/** Production entry point: owns the local form state and delegates to [LoginScreenContent]. */
+/**
+ * Production entry point: owns the local form state and delegates to
+ * [LoginScreenContent]. Success routes through [AuthViewModel.authState]; `App.kt`
+ * reacts to the resulting [com.jecsdev.papipuntos.model.AuthState] instead of a callback.
+ */
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
-    // `isSignUp` lets the caller send new accounts through profile setup first.
-    onAuthenticated: (isSignUp: Boolean) -> Unit = {},
+    viewModel: AuthViewModel = koinViewModel(),
 ) {
     var mode by remember { mutableStateOf(LoginMode.Login) }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    val authenticate = { onAuthenticated(mode == LoginMode.SignUp) }
+    val error by viewModel.error.collectAsStateWithLifecycle()
+    val submit = {
+        if (mode == LoginMode.SignUp) {
+            viewModel.signUp(email, password)
+        } else {
+            viewModel.logIn(email, password)
+        }
+        Unit
+    }
     LoginScreenContent(
         mode = mode,
         email = email,
         password = password,
-        onModeChange = { mode = it },
-        onEmailChange = { email = it },
+        error = error,
+        // Switching between login and sign-up drops any stale error from the other mode.
+        onModeChange = {
+            mode = it
+            viewModel.clearError()
+        },
+        // Email is trimmed + lowercased as typed so casing or stray spaces never cause a
+        // sign-up/login mismatch. The password is left untouched: it is a case-sensitive secret.
+        onEmailChange = { email = it.trim().lowercase() },
         onPasswordChange = { password = it },
-        onSubmit = authenticate,
-        onContinueWithGoogle = authenticate,
-        onContinueWithApple = authenticate,
+        onSubmit = submit,
+        // Opens the provider's consent page; the session returns through the deep link.
+        onContinueWithGoogle = { viewModel.signInWithGoogle() },
+        onContinueWithApple = { viewModel.signInWithApple() },
         modifier = modifier,
     )
 }
@@ -84,6 +106,7 @@ fun LoginScreenContent(
     email: String,
     password: String,
     modifier: Modifier = Modifier,
+    error: String? = null,
     onModeChange: (LoginMode) -> Unit = {},
     onEmailChange: (String) -> Unit = {},
     onPasswordChange: (String) -> Unit = {},
@@ -153,6 +176,17 @@ fun LoginScreenContent(
                 MaterialTheme.colorScheme.primary,
             ),
         )
+
+        // Auth failures (e.g. wrong password) surface here; nothing renders while error is null.
+        if (error != null) {
+            Spacer(Modifier.height(12.dp))
+            Text(
+                text = error,
+                style = PapiPuntosTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                textAlign = TextAlign.Center,
+            )
+        }
 
         Spacer(Modifier.height(16.dp))
         LabeledDivider(text = "o continúa con")
@@ -234,6 +268,19 @@ private fun LoginScreenPreview() {
             mode = LoginMode.Login,
             email = "",
             password = "",
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun LoginScreenErrorPreview() {
+    PapiPuntosTheme {
+        LoginScreenContent(
+            mode = LoginMode.Login,
+            email = "sofia@email.com",
+            password = "12345",
+            error = "Correo o contraseña incorrectos",
         )
     }
 }

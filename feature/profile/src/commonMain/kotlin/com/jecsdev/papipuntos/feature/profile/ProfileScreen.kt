@@ -298,7 +298,10 @@ private fun AchievementsGrid(achievements: List<Achievement>) {
 }
 
 @Composable
-private fun AchievementCell(achievement: Achievement, modifier: Modifier = Modifier) {
+private fun AchievementCell(
+    achievement: Achievement,
+    modifier: Modifier = Modifier,
+) {
     Column(
         modifier = modifier
             .clip(PapiPuntosTheme.shapes.xxl)

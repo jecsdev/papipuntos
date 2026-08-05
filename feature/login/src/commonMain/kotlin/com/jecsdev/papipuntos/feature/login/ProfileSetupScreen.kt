@@ -44,7 +44,9 @@ import com.jecsdev.papipuntos.designsystem.component.PapiPuntosTextField
 import com.jecsdev.papipuntos.designsystem.component.PrimaryActionButton
 import com.jecsdev.papipuntos.designsystem.icon.PapiPuntosIcons
 import com.jecsdev.papipuntos.designsystem.theme.PapiPuntosTheme
+import com.jecsdev.papipuntos.model.NewProfile
 import com.jecsdev.papipuntos.model.Player
+import org.koin.compose.viewmodel.koinViewModel
 
 /** Emojis offered as avatars while setting up the two profiles. */
 val emojiOptions: List<String> =
@@ -70,12 +72,13 @@ data class ProfileDraft(
 /**
  * First-run setup: name, avatar and PIN for both profiles of the couple, on a
  * single screen. Owns the two drafts and hands the visuals to
- * [ProfileSetupContent]. Real persistence lands in the local-auth stage.
+ * [ProfileSetupContent]. Saving routes through [AuthViewModel.authState]; `App.kt`
+ * reacts to the resulting [com.jecsdev.papipuntos.model.AuthState] instead of a callback.
  */
 @Composable
 fun ProfileSetupScreen(
     modifier: Modifier = Modifier,
-    onSaved: () -> Unit = {},
+    viewModel: AuthViewModel = koinViewModel(),
 ) {
     var papi by remember { mutableStateOf(ProfileDraft(Player.Papi, name = "Mateo", emoji = "👨🏻")) }
     var mami by remember { mutableStateOf(ProfileDraft(Player.Mami, name = "Sofía", emoji = "👩🏻")) }
@@ -91,7 +94,12 @@ fun ProfileSetupScreen(
         onMamiChange = { mami = it },
         onSave = {
             attemptedSave = true
-            if (valid) onSaved()
+            if (valid) {
+                viewModel.saveProfiles(
+                    NewProfile(Player.Papi, papi.name, papi.emoji, papi.pin),
+                    NewProfile(Player.Mami, mami.name, mami.emoji, mami.pin),
+                )
+            }
         },
         modifier = modifier,
     )

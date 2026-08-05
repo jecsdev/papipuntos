@@ -129,16 +129,18 @@ object PapiPuntosIcons {
     }
 }
 
-private fun materialIcon(name: String, pathData: String): ImageVector =
-    ImageVector.Builder(
-        name = name,
-        defaultWidth = 24.dp,
-        defaultHeight = 24.dp,
-        viewportWidth = 24f,
-        viewportHeight = 24f,
-    ).apply {
-        addPath(
-            pathData = PathParser().parsePathString(pathData).toNodes(),
-            fill = SolidColor(Color.Black),
-        )
-    }.build()
+private fun materialIcon(
+    name: String,
+    pathData: String,
+): ImageVector = ImageVector.Builder(
+    name = name,
+    defaultWidth = 24.dp,
+    defaultHeight = 24.dp,
+    viewportWidth = 24f,
+    viewportHeight = 24f,
+).apply {
+    addPath(
+        pathData = PathParser().parsePathString(pathData).toNodes(),
+        fill = SolidColor(Color.Black),
+    )
+}.build()

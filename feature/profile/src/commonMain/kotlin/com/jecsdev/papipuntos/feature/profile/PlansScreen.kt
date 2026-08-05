@@ -230,7 +230,10 @@ private fun PremiumPlanCard(
 
 /** Uppercase plan tier label (`text-xs font-bold uppercase tracking-wider`). */
 @Composable
-private fun PlanLabel(text: String, color: Color) {
+private fun PlanLabel(
+    text: String,
+    color: Color,
+) {
     Text(
         text = text.uppercase(),
         style = PapiPuntosTheme.typography.labelMedium,

@@ -1,0 +1,35 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{kt,kts}]
+# Match what Android Studio's formatter produces, rather than ktlint's stricter default,
+# so the IDE and the linter don't disagree on every save.
+ktlint_code_style = intellij_idea
+max_line_length = 120
+# Composables are intentionally PascalCase (ScoreboardScreen, InfoCard) — ktlint's
+# function-naming rule assumes camelCase and would flag every composable as an error.
+ktlint_standard_function-naming = disabled
+# @Preview / single-composable files trip the filename rule; not worth enforcing here.
+ktlint_standard_filename = disabled
+# Keep one-parameter-per-line signatures (the Compose convention) instead of letting ktlint
+# collapse short signatures onto a single line. 2+ params stay multiline; the code already is.
+ktlint_function_signature_rule_force_multiline_when_parameter_count_greater_or_equal_than = 2
+ktlint_class_signature_rule_force_multiline_when_parameter_count_greater_or_equal_than = 2
+
+# Icon definitions are opaque SVG path-data strings — there is no meaningful place to wrap them,
+# so the line-length rule doesn't apply here.
+[**/designsystem/icon/*.kt]
+ktlint_standard_max-line-length = disabled
+
+[*.{yml,yaml,json}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false

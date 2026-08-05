@@ -24,7 +24,10 @@ import com.jecsdev.papipuntos.designsystem.icon.PapiPuntosIcons
 import com.jecsdev.papipuntos.designsystem.theme.PapiPuntosTheme
 
 /** The four destinations of the bottom navigation. */
-enum class ScoreboardTab(val label: String, val icon: ImageVector) {
+enum class ScoreboardTab(
+    val label: String,
+    val icon: ImageVector,
+) {
     Home("Inicio", PapiPuntosIcons.Home),
     History("Historial", PapiPuntosIcons.History),
     Rewards("Canjear", PapiPuntosIcons.Gift),
