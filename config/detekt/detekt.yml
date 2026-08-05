@@ -1,0 +1,27 @@
+# Detekt config — merged on top of detekt's defaults, so only overrides live here.
+# Tuned for Compose Multiplatform: composables break several rules that assume plain Kotlin.
+
+build:
+  # Any surviving issue fails the CI job. Raise/lower as the codebase settles.
+  maxIssues: 0
+
+naming:
+  FunctionNaming:
+    # Composables are PascalCase by convention — don't flag them.
+    ignoreAnnotated: ['Composable']
+
+complexity:
+  LongParameterList:
+    # State hoisting pushes many parameters into XxxContent(...) composables.
+    ignoreAnnotated: ['Composable']
+  LongMethod:
+    # Composable layouts are legitimately long; give them headroom.
+    threshold: 80
+
+style:
+  MagicNumber:
+    # dp/sp/color literals are everywhere in UI code; noise, not smell.
+    active: false
+  UnusedPrivateMember:
+    # @Preview functions look "unused" to static analysis.
+    ignoreAnnotated: ['Preview', 'Composable']
