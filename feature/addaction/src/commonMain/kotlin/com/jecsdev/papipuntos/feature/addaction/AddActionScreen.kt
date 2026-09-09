@@ -16,10 +16,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jecsdev.papipuntos.designsystem.component.ActionListItem
 import com.jecsdev.papipuntos.designsystem.component.PapiPuntosTextField
 import com.jecsdev.papipuntos.designsystem.component.PapiPuntosTopBar
@@ -37,25 +35,34 @@ import com.jecsdev.papipuntos.designsystem.icon.PapiPuntosIcons
 import com.jecsdev.papipuntos.designsystem.theme.PapiPuntosTheme
 import com.jecsdev.papipuntos.feature.addaction.model.SuggestedAction
 import com.jecsdev.papipuntos.model.Player
+import kotlinx.coroutines.flow.collect
+import org.koin.compose.viewmodel.koinViewModel
 
-/** Production entry point: owns the selected profile and search query. */
+/** Production entry point backed by [AddActionViewModel]. */
 @Composable
 fun AddActionScreen(
     modifier: Modifier = Modifier,
     suggestions: List<SuggestedAction> = AddActionSampleData.suggestions,
     onBack: () -> Unit = {},
     onActionPicked: (Player, SuggestedAction) -> Unit = { _, _ -> },
+    viewModel: AddActionViewModel = koinViewModel(),
 ) {
-    var target by remember { mutableStateOf(Player.Papi) }
-    var query by remember { mutableStateOf("") }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is AddActionEvent.Submitted -> onActionPicked(event.beneficiary, event.suggestion)
+            }
+        }
+    }
     AddActionScreenContent(
         suggestions = suggestions,
-        target = target,
-        query = query,
-        onTargetChange = { target = it },
-        onQueryChange = { query = it },
+        target = uiState.target,
+        query = uiState.query,
+        onTargetChange = viewModel::selectTarget,
+        onQueryChange = viewModel::updateQuery,
         onBack = onBack,
-        onActionPicked = { onActionPicked(target, it) },
+        onActionPicked = viewModel::submit,
         modifier = modifier,
     )
 }

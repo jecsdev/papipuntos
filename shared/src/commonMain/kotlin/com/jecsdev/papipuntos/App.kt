@@ -17,7 +17,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jecsdev.papipuntos.data.db.platformAuthModule
 import com.jecsdev.papipuntos.data.di.dataModule
 import com.jecsdev.papipuntos.designsystem.theme.PapiPuntosTheme
+import com.jecsdev.papipuntos.domain.di.domainModule
 import com.jecsdev.papipuntos.feature.addaction.AddActionScreen
+import com.jecsdev.papipuntos.feature.addaction.di.addActionModule
 import com.jecsdev.papipuntos.feature.login.AuthViewModel
 import com.jecsdev.papipuntos.feature.login.LoginScreen
 import com.jecsdev.papipuntos.feature.login.ProfileSetupScreen
@@ -41,7 +43,18 @@ private enum class AppScreen { Scoreboard, AddAction, History, Rewards, Redeem, 
 @Composable
 @Preview
 fun App() {
-    KoinApplication(application = { modules(platformAuthModule, dataModule, loginModule, scoreboardModule) }) {
+    KoinApplication(
+        application = {
+            modules(
+                platformAuthModule,
+                dataModule,
+                domainModule,
+                loginModule,
+                scoreboardModule,
+                addActionModule,
+            )
+        },
+    ) {
         PapiPuntosTheme { AppRoot() }
     }
 }

@@ -41,6 +41,7 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.core.designsystem)
             implementation(projects.core.model)
+            implementation(projects.core.domain)
             implementation(projects.core.data)
             implementation(projects.feature.scoreboard)
             implementation(projects.feature.login)
