@@ -10,9 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 /** Room-backed local-first implementation of [ActionRepository]. */
-class RoomActionRepository(
-    private val dao: ActionDao,
-) : ActionRepository {
+class RoomActionRepository(private val dao: ActionDao) : ActionRepository {
     override suspend fun create(action: Action): Result<Unit> = runCatching {
         dao.insert(action.toEntity())
     }

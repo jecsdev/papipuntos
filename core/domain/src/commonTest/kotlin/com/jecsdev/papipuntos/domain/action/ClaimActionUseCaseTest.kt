@@ -112,9 +112,8 @@ class ClaimActionUseCaseTest {
         assertEquals("action-789", repository.createdAction?.id)
     }
 
-    private class RecordingActionRepository(
-        private val createResult: Result<Unit> = Result.success(Unit),
-    ) : ActionRepository {
+    private class RecordingActionRepository(private val createResult: Result<Unit> = Result.success(Unit)) :
+        ActionRepository {
         var createdAction: Action? = null
             private set
 
