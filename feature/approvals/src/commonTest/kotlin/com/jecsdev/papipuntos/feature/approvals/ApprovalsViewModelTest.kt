@@ -73,9 +73,8 @@ class ApprovalsViewModelTest {
         assertEquals(1, state.actions.size)
     }
 
-    private class RecordingActionRepository(
-        private val resolveResult: Result<Boolean> = Result.success(true),
-    ) : ActionRepository {
+    private class RecordingActionRepository(private val resolveResult: Result<Boolean> = Result.success(true)) :
+        ActionRepository {
         val pendingAction = Action(
             id = "pending-action",
             label = "Lavaste los platos",

@@ -28,9 +28,9 @@ import com.jecsdev.papipuntos.designsystem.theme.PapiPuntosTheme
 import com.jecsdev.papipuntos.domain.action.ActionDecision
 import com.jecsdev.papipuntos.model.Action
 import com.jecsdev.papipuntos.model.Player
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
-import org.jetbrains.compose.resources.stringResource
 import papipuntos.core.designsystem.generated.resources.Res
 import papipuntos.core.designsystem.generated.resources.approvals_approve
 import papipuntos.core.designsystem.generated.resources.approvals_description

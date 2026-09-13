@@ -36,10 +36,9 @@ import com.jecsdev.papipuntos.designsystem.icon.PapiPuntosIcons
 import com.jecsdev.papipuntos.designsystem.theme.PapiPuntosTheme
 import com.jecsdev.papipuntos.feature.addaction.model.SuggestedAction
 import com.jecsdev.papipuntos.model.Player
-import kotlinx.coroutines.flow.collect
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
-import org.jetbrains.compose.resources.stringResource
 import papipuntos.core.designsystem.generated.resources.Res
 import papipuntos.core.designsystem.generated.resources.add_action_empty_results
 import papipuntos.core.designsystem.generated.resources.add_action_profile_rule
