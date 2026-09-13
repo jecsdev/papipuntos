@@ -98,6 +98,14 @@ class InMemoryAuthRepository : AuthRepository {
         return Result.success(Unit)
     }
 
+    override suspend fun requestProfileSwitch(): Result<Unit> {
+        if (profiles.isEmpty()) {
+            return Result.failure(IllegalStateException("No hay perfiles configurados"))
+        }
+        _state.value = AuthState.ProfileSelection(profiles.toIdentity())
+        return Result.success(Unit)
+    }
+
     private fun NewProfile.toIdentity(): Profile = Profile(player, name, emoji)
 
     private fun List<NewProfile>.toIdentity(): List<Profile> = map { it.toIdentity() }

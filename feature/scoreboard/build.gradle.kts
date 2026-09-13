@@ -24,6 +24,7 @@ kotlin {
         androidResources {
             enable = true
         }
+        withHostTest {}
     }
 
     sourceSets {
@@ -32,6 +33,7 @@ kotlin {
         }
         commonMain.dependencies {
             implementation(projects.core.model)
+            implementation(projects.core.domain)
             implementation(projects.core.designsystem)
 
             implementation(libs.compose.runtime)
@@ -43,6 +45,10 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.koin.core)
             implementation(libs.koin.compose.viewmodel)
+        }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
         }
     }
 }

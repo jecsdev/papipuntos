@@ -33,6 +33,7 @@ fun SegmentedToggle(
     activeContainerColor: Color = Color.White,
     activeContentColor: Color = MaterialTheme.colorScheme.onSurface,
     inactiveContentColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    enabled: Boolean = true,
 ) {
     val trackShape = PapiPuntosTheme.shapes.xxl
     val pillShape = PapiPuntosTheme.shapes.xl
@@ -52,7 +53,7 @@ fun SegmentedToggle(
                     .then(if (active) Modifier.shadow(2.dp, pillShape) else Modifier)
                     .clip(pillShape)
                     .background(if (active) activeContainerColor else Color.Transparent)
-                    .clickable { onSelect(index) }
+                    .clickable(enabled = enabled) { onSelect(index) }
                     .padding(vertical = 8.dp),
                 contentAlignment = Alignment.Center,
             ) {

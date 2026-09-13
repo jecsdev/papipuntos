@@ -75,7 +75,8 @@ kotlin {
             kotlin.srcDir(generateSupabaseConfig)
 
             dependencies {
-                implementation(projects.core.model)
+            implementation(projects.core.model)
+            implementation(projects.core.domain)
 
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.koin.core)

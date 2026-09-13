@@ -19,15 +19,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jecsdev.papipuntos.designsystem.component.PapiPuntosTopBar
 import com.jecsdev.papipuntos.designsystem.component.SegmentedToggle
 import com.jecsdev.papipuntos.designsystem.theme.PapiPuntosTheme
 import com.jecsdev.papipuntos.feature.scoreboard.component.ActionEntryRow
 import com.jecsdev.papipuntos.feature.scoreboard.model.ActionEntry
 import com.jecsdev.papipuntos.model.Player
+import com.jecsdev.papipuntos.model.Profile
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 /** The three filter tabs over the logged actions: everyone, only Papi, only Mami. */
 enum class HistoryFilter(
@@ -42,13 +45,15 @@ enum class HistoryFilter(
 /** Production entry point: owns the active filter. */
 @Composable
 fun HistoryScreen(
+    profiles: List<Profile>,
     modifier: Modifier = Modifier,
-    actions: List<ActionEntry> = ScoreboardSampleData.state.recentActions,
+    viewModel: ScoreboardViewModel = koinViewModel(parameters = { parametersOf(profiles) }),
     onBack: () -> Unit = {},
 ) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
     var filter by remember { mutableStateOf(HistoryFilter.All) }
     HistoryScreenContent(
-        actions = actions,
+        actions = state.recentActions,
         filter = filter,
         onFilterChange = { filter = it },
         onBack = onBack,
@@ -108,16 +113,5 @@ fun HistoryScreenContent(
                 ActionEntryRow(entry = entry)
             }
         }
-    }
-}
-
-@Preview
-@Composable
-private fun HistoryScreenPreview() {
-    PapiPuntosTheme {
-        HistoryScreenContent(
-            actions = ScoreboardSampleData.state.recentActions,
-            filter = HistoryFilter.All,
-        )
     }
 }

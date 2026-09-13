@@ -81,6 +81,12 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
             .onFailure { _error.value = it.message }
     }
 
+    fun requestProfileSwitch() = viewModelScope.launch {
+        repository.requestProfileSwitch()
+            .onSuccess { _error.value = null }
+            .onFailure { _error.value = it.message }
+    }
+
     fun logOut() = viewModelScope.launch { repository.logOut() }
 
     fun clearError() {
