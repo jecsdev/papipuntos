@@ -28,8 +28,18 @@ import com.jecsdev.papipuntos.designsystem.theme.PapiPuntosTheme
 import com.jecsdev.papipuntos.domain.action.ActionDecision
 import com.jecsdev.papipuntos.model.Action
 import com.jecsdev.papipuntos.model.Player
-import org.koin.core.parameter.parametersOf
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
+import org.jetbrains.compose.resources.stringResource
+import papipuntos.core.designsystem.generated.resources.Res
+import papipuntos.core.designsystem.generated.resources.approvals_approve
+import papipuntos.core.designsystem.generated.resources.approvals_description
+import papipuntos.core.designsystem.generated.resources.approvals_empty
+import papipuntos.core.designsystem.generated.resources.approvals_reject
+import papipuntos.core.designsystem.generated.resources.approvals_request_subtitle
+import papipuntos.core.designsystem.generated.resources.approvals_saving
+import papipuntos.core.designsystem.generated.resources.approvals_title
+import papipuntos.core.designsystem.generated.resources.points_badge
 
 /** Production entry point for requests that the active profile must review. */
 @Composable
@@ -72,9 +82,9 @@ fun ApprovalsScreenContent(
             .padding(top = 12.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        PapiPuntosTopBar(title = "Solicitudes pendientes", onBack = onBack)
+        PapiPuntosTopBar(title = stringResource(Res.string.approvals_title), onBack = onBack)
         Text(
-            text = "Revisa las acciones antes de que sumen puntos.",
+            text = stringResource(Res.string.approvals_description),
             style = PapiPuntosTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -118,10 +128,10 @@ private fun PendingApprovalCard(
             Player.Mami -> PapiPuntosTheme.colors.mamiSoft
         },
         title = action.label,
-        subtitle = "${action.beneficiary.name} solicita puntos",
+        subtitle = stringResource(Res.string.approvals_request_subtitle, action.beneficiary.name),
     ) {
         PointsBadge(
-            text = "+${action.points}",
+            text = stringResource(Res.string.points_badge, action.points),
             containerColor = accent,
             contentColor = androidx.compose.ui.graphics.Color.White,
         )
@@ -135,14 +145,18 @@ private fun PendingApprovalCard(
             enabled = !isResolving,
             modifier = Modifier.weight(1f),
         ) {
-            Text("Rechazar")
+            Text(stringResource(Res.string.approvals_reject))
         }
         OutlinedButton(
             onClick = onApprove,
             enabled = !isResolving,
             modifier = Modifier.weight(1f),
         ) {
-            Text(if (isResolving) "Guardando..." else "Aprobar")
+            Text(
+                stringResource(
+                    if (isResolving) Res.string.approvals_saving else Res.string.approvals_approve,
+                ),
+            )
         }
     }
     Spacer(Modifier.height(8.dp))
@@ -151,7 +165,7 @@ private fun PendingApprovalCard(
 @Composable
 private fun EmptyApprovals() {
     Text(
-        text = "No tienes solicitudes pendientes.",
+        text = stringResource(Res.string.approvals_empty),
         style = PapiPuntosTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )

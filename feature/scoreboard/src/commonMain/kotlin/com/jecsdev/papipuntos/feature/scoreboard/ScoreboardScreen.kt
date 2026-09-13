@@ -35,8 +35,8 @@ import com.jecsdev.papipuntos.feature.scoreboard.component.ScoreboardHeader
 import com.jecsdev.papipuntos.feature.scoreboard.component.ScoreboardTab
 import com.jecsdev.papipuntos.model.Player
 import com.jecsdev.papipuntos.model.Profile
-import org.koin.core.parameter.parametersOf
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 /** Production entry point: pulls state from the ViewModel and drives [ScoreboardScreenContent]. */
 @Composable

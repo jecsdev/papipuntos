@@ -2,7 +2,6 @@ package com.jecsdev.papipuntos.feature.addaction
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.content.MediaType.Companion.Text
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,8 +37,16 @@ import com.jecsdev.papipuntos.designsystem.theme.PapiPuntosTheme
 import com.jecsdev.papipuntos.feature.addaction.model.SuggestedAction
 import com.jecsdev.papipuntos.model.Player
 import kotlinx.coroutines.flow.collect
-import org.koin.core.parameter.parametersOf
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
+import org.jetbrains.compose.resources.stringResource
+import papipuntos.core.designsystem.generated.resources.Res
+import papipuntos.core.designsystem.generated.resources.add_action_empty_results
+import papipuntos.core.designsystem.generated.resources.add_action_profile_rule
+import papipuntos.core.designsystem.generated.resources.add_action_search_placeholder
+import papipuntos.core.designsystem.generated.resources.add_action_suggestions
+import papipuntos.core.designsystem.generated.resources.add_action_title
+import papipuntos.core.designsystem.generated.resources.points_badge
 
 /** Production entry point backed by [AddActionViewModel]. */
 @Composable
@@ -99,7 +106,7 @@ fun AddActionScreenContent(
             .padding(horizontal = 20.dp)
             .padding(top = 12.dp, bottom = 24.dp),
     ) {
-        PapiPuntosTopBar(title = "Agregar acción", onBack = onBack)
+        PapiPuntosTopBar(title = stringResource(Res.string.add_action_title), onBack = onBack)
 
         Spacer(Modifier.height(12.dp))
 
@@ -118,7 +125,7 @@ fun AddActionScreenContent(
         if (!targetSelectionEnabled) {
             Spacer(Modifier.height(8.dp))
             Text(
-                text = "Las acciones se registran para tu perfil y las aprueba el otro perfil.",
+                text = stringResource(Res.string.add_action_profile_rule),
                 style = PapiPuntosTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -128,13 +135,13 @@ fun AddActionScreenContent(
         PapiPuntosTextField(
             value = query,
             onValueChange = onQueryChange,
-            placeholder = "Buscar acción...",
+            placeholder = stringResource(Res.string.add_action_search_placeholder),
             leadingIcon = PapiPuntosIcons.Search,
         )
 
         Spacer(Modifier.height(20.dp))
         Text(
-            text = "SUGERIDAS",
+            text = stringResource(Res.string.add_action_suggestions),
             style = PapiPuntosTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             letterSpacing = 0.08.em,
@@ -165,7 +172,7 @@ fun AddActionScreenContent(
                         },
                     ) {
                         PointsBadge(
-                            text = "+${action.points}",
+                            text = stringResource(Res.string.points_badge, action.points),
                             containerColor = PapiPuntosTheme.colors.mamiSoft,
                             contentColor = PapiPuntosTheme.colors.mami,
                         )
@@ -189,7 +196,7 @@ private fun EmptyResults() {
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            text = "Sin resultados",
+            text = stringResource(Res.string.add_action_empty_results),
             style = PapiPuntosTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,

@@ -1,0 +1,16 @@
+<resources>
+    <string name="add_action_title">Agregar acción</string>
+    <string name="add_action_profile_rule">Las acciones se registran para tu perfil y las aprueba el otro perfil.</string>
+    <string name="add_action_search_placeholder">Buscar acción...</string>
+    <string name="add_action_suggestions">SUGERIDAS</string>
+    <string name="add_action_empty_results">Sin resultados</string>
+    <string name="points_badge">+%1$d</string>
+
+    <string name="approvals_title">Solicitudes pendientes</string>
+    <string name="approvals_description">Revisa las acciones antes de que sumen puntos.</string>
+    <string name="approvals_request_subtitle">%1$s solicita puntos</string>
+    <string name="approvals_reject">Rechazar</string>
+    <string name="approvals_approve">Aprobar</string>
+    <string name="approvals_saving">Guardando...</string>
+    <string name="approvals_empty">No tienes solicitudes pendientes.</string>
+</resources>

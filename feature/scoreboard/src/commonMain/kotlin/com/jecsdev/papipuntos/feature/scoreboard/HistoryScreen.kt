@@ -29,8 +29,8 @@ import com.jecsdev.papipuntos.feature.scoreboard.component.ActionEntryRow
 import com.jecsdev.papipuntos.feature.scoreboard.model.ActionEntry
 import com.jecsdev.papipuntos.model.Player
 import com.jecsdev.papipuntos.model.Profile
-import org.koin.core.parameter.parametersOf
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 /** The three filter tabs over the logged actions: everyone, only Papi, only Mami. */
 enum class HistoryFilter(

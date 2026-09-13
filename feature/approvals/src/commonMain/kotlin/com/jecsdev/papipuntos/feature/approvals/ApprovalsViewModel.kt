@@ -8,8 +8,8 @@ import com.jecsdev.papipuntos.domain.action.ResolveActionCommand
 import com.jecsdev.papipuntos.domain.action.ResolveActionUseCase
 import com.jecsdev.papipuntos.model.Action
 import com.jecsdev.papipuntos.model.Player
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
@@ -48,7 +48,10 @@ class ApprovalsViewModel(
             initialValue = ApprovalsUiState(),
         )
 
-    fun decide(action: Action, decision: ActionDecision) {
+    fun decide(
+        action: Action,
+        decision: ActionDecision,
+    ) {
         if (uiState.value.resolvingActionId != null) return
         viewModelScope.launch {
             resolvingActionId.value = action.id
