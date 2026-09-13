@@ -1,6 +1,7 @@
 *.iml
 .kotlin
 .gradle
+.gradle-user/
 **/build/
 xcuserdata
 !src/**/build/
@@ -20,3 +21,4 @@ node_modules/
 
 # Local secrets (Supabase URL + anon key). Never commit; see secrets.properties.example.
 secrets.properties
+/LOCAL_BUSINESS_RULES.md

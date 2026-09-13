@@ -1,13 +1,13 @@
-package com.jecsdev.papipuntos.feature.scoreboard.di
+package com.jecsdev.papipuntos.feature.profile.di
 
-import com.jecsdev.papipuntos.feature.scoreboard.ScoreboardViewModel
+import com.jecsdev.papipuntos.feature.profile.ProfileViewModel
 import com.jecsdev.papipuntos.model.Player
 import com.jecsdev.papipuntos.model.Profile
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
-val scoreboardModule = module {
+val profileModule = module {
     viewModel { (activePlayer: Player, profiles: List<Profile>) ->
-        ScoreboardViewModel(get(), get(), activePlayer, profiles)
+        ProfileViewModel(activePlayer, profiles, get(), get())
     }
 }

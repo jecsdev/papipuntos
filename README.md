@@ -1,31 +1,140 @@
-This is a Kotlin Multiplatform project targeting Android, iOS.
+# Papi Puntos
 
-* [/iosApp](./iosApp/iosApp) contains an iOS application. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+Aplicación móvil multiplataforma para parejas que convierte tareas y gestos cotidianos en puntos. Cada persona usa su propio perfil protegido con PIN, reclama acciones y la otra persona las aprueba o rechaza antes de que afecten el saldo.
 
-* [/shared](./shared/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./shared/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./shared/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./shared/src/jvmMain/kotlin)
-    folder is the appropriate location.
+> El nombre de producto cambiará a **Usify** más adelante. Por ahora, el paquete y los módulos conservan `papipuntos`.
 
-### Running the apps
+## Qué incluye hoy
 
-Use the run configurations provided by the run widget in your IDE's toolbar. You can also use these commands and options:
+- Perfiles de pareja con PIN, sesión local y cambio de perfil.
+- Registro e inicio de sesión local; inicio de sesión con Google mediante Supabase Auth.
+- Acciones pendientes: quien reclama no puede aprobar su propia acción.
+- Aprobación o rechazo con motivo obligatorio y detalle visible en el historial.
+- Saldo soberano por perfil: solo las acciones aprobadas suman puntos.
+- Catálogo de recompensas local y canje inmediato contra el saldo del perfil activo.
+- Perfil con puntos, racha y logros derivados de datos persistidos.
+- Persistencia local con Room KMP y contraseñas/PIN protegidos con PBKDF2-HMAC-SHA256 y salt aleatorio.
+- UI compartida con Compose Multiplatform para Android e iOS.
 
-- Android app: `./gradlew :androidApp:assembleDebug`
-- iOS app: open the [/iosApp](./iosApp) directory in Xcode and run it from there.
+La sincronización de acciones, canjes y perfiles con Supabase todavía no está implementada. En esta etapa esos datos viven localmente en Room.
 
-### Running tests
+## Regla central del producto
 
-Use the run button in your IDE's editor gutter, or run tests using Gradle tasks:
+Cada perfil es soberano:
 
-- Android tests: `./gradlew :shared:testAndroidHostTest`
-- iOS tests: `./gradlew :shared:iosSimulatorArm64Test`
+```text
+saldo del perfil = puntos de sus acciones aprobadas − costo de sus propios canjes
+```
 
----
+Una acción creada por Papi queda pendiente para Mami, y viceversa. Nadie puede aprobar su propia solicitud ni canjear puntos del otro perfil. Consulta las reglas completas en [LOCAL_BUSINESS_RULES.md](LOCAL_BUSINESS_RULES.md).
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+## Stack
+
+- Kotlin Multiplatform + Compose Multiplatform
+- Material 3 y Compose Resources
+- Room KMP + SQLite bundled
+- Koin para inyección de dependencias
+- Coroutines y StateFlow
+- Supabase Auth (`supabase-kt`) para OAuth web con Google
+- KSP para generación de Room
+- GitHub Actions, ktlint y detekt
+
+## Arquitectura
+
+```text
+core/
+  model/          Entidades puras y estados compartidos
+  domain/         Repositorios, casos de uso y reglas de negocio
+  data/           Room, hashing, Auth y adaptadores de persistencia
+  designsystem/   Theme, componentes e i18n de Compose Resources
+
+feature/
+  login/          Cuenta, PIN y perfiles
+  addaction/      Reclamar una acción
+  approvals/      Aprobar o rechazar solicitudes pendientes
+  scoreboard/     Marcador e historial
+  rewards/        Catálogo y canje de recompensas
+  profile/        Perfil, racha, logros y planes
+
+shared/           Router Compose y composición de módulos Koin
+androidApp/       Entrada Android
+iosApp/           Entrada SwiftUI/iOS
+```
+
+La dirección de dependencias para flujos de negocio es:
+
+```text
+Repository → Use case → ViewModel → UI → Tests
+```
+
+## Requisitos
+
+- JDK 17
+- Android Studio reciente y Android SDK
+- Para ejecutar iOS: macOS con Xcode
+
+Windows y Linux pueden compilar el target Kotlin/Native de iOS, pero no ejecutar el simulador de Apple.
+
+## Configuración local
+
+1. Clona el repositorio y abre la carpeta raíz del proyecto:
+
+   ```bash
+   cd papipuntos
+   ```
+
+2. Opcionalmente, configura Supabase para habilitar Google OAuth:
+
+   ```bash
+   cp secrets.properties.example secrets.properties
+   ```
+
+   En PowerShell:
+
+   ```powershell
+   Copy-Item secrets.properties.example secrets.properties
+   ```
+
+3. Completa `secrets.properties` con los valores del dashboard de Supabase:
+
+   ```properties
+   supabase.url=https://TU-PROYECTO.supabase.co
+   supabase.anonKey=TU-ANON-KEY
+   ```
+
+`secrets.properties` está ignorado por Git. Nunca agregues una `service_role` key: esa clave no pertenece a una app cliente. Si no creas el archivo, el proyecto igual compila; simplemente el inicio de sesión remoto no podrá conectarse.
+
+## Ejecutar y verificar
+
+| Propósito | macOS/Linux | Windows PowerShell |
+| --- | --- | --- |
+| Compilar Android | `./gradlew :androidApp:assembleDebug` | `.\gradlew.bat :androidApp:assembleDebug` |
+| Ejecutar todos los tests host | `./gradlew allTests` | `.\gradlew.bat allTests` |
+| Compilar iOS común | `./gradlew compileKotlinIosSimulatorArm64` | `.\gradlew.bat compileKotlinIosSimulatorArm64` |
+
+Para ejecutar Android, usa la configuración `androidApp` desde Android Studio o instala el APK generado. Para ejecutar iOS, abre `iosApp/` con Xcode en una Mac.
+
+## Calidad y CI
+
+Cada push y pull request ejecuta:
+
+- Build Android y tests host.
+- Compilación del target iOS en un runner macOS.
+- ktlint para formato Kotlin.
+- detekt para code smells.
+
+Antes de abrir un PR, ejecuta al menos:
+
+```bash
+./gradlew assembleDebug allTests
+./gradlew compileKotlinIosSimulatorArm64
+```
+
+## Estado y roadmap
+
+- [x] UI Compose Multiplatform.
+- [x] Auth local, perfiles con PIN y Google OAuth.
+- [x] Acciones, aprobaciones, historial, canjes, logros y persistencia local.
+- [ ] Sincronización remota con Supabase y resolución de conflictos.
+- [ ] Sign in with Apple (requiere Apple Developer Program).
+- [ ] Distribución iOS mediante TestFlight.

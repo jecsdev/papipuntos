@@ -44,6 +44,7 @@ fun ScoreboardScreen(
     activePlayer: Player,
     profiles: List<Profile>,
     viewModel: ScoreboardViewModel = koinViewModel(
+        key = "scoreboard-${activePlayer.name}",
         parameters = { parametersOf(activePlayer, profiles) },
     ),
     onAddAction: () -> Unit = {},
@@ -56,6 +57,7 @@ fun ScoreboardScreen(
     var selectedTab by remember { mutableStateOf(ScoreboardTab.Home) }
     ScoreboardScreenContent(
         state = state,
+        activePlayer = activePlayer,
         selectedTab = selectedTab,
         // Tabs that own a screen navigate away; Home just stays put.
         onTabSelected = { tab ->
@@ -77,6 +79,7 @@ fun ScoreboardScreen(
 @Composable
 fun ScoreboardScreenContent(
     state: ScoreboardUiState,
+    activePlayer: Player,
     selectedTab: ScoreboardTab,
     modifier: Modifier = Modifier,
     onTabSelected: (ScoreboardTab) -> Unit = {},
@@ -98,9 +101,9 @@ fun ScoreboardScreenContent(
                 .padding(top = 12.dp),
         ) {
             ScoreboardHeader(
-                coupleNames = state.coupleNames,
-                papiAvatar = state.papiAvatar,
-                mamiAvatar = state.mamiAvatar,
+                activeName = if (activePlayer == Player.Papi) state.papiName else state.mamiName,
+                activeAvatar = if (activePlayer == Player.Papi) state.papiAvatar else state.mamiAvatar,
+                activePlayer = activePlayer,
             )
 
             Spacer(Modifier.height(20.dp))

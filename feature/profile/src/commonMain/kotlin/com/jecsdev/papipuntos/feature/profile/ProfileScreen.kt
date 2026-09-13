@@ -20,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,31 +31,41 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jecsdev.papipuntos.designsystem.component.PapiPuntosTopBar
 import com.jecsdev.papipuntos.designsystem.component.ProfileAvatar
 import com.jecsdev.papipuntos.designsystem.icon.PapiPuntosIcons
 import com.jecsdev.papipuntos.designsystem.theme.PapiPuntosTheme
 import com.jecsdev.papipuntos.feature.profile.model.Achievement
 import com.jecsdev.papipuntos.model.Player
+import com.jecsdev.papipuntos.model.Profile
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 /** Production entry point. Profile is a read-only summary, so it just forwards nav. */
 @Composable
 fun ProfileScreen(
     activePlayer: Player,
+    profiles: List<Profile>,
     modifier: Modifier = Modifier,
     onBack: () -> Unit = {},
     onOpenPlans: () -> Unit = {},
     onSwitchProfile: () -> Unit = {},
+    viewModel: ProfileViewModel = koinViewModel(
+        key = "profile-${activePlayer.name}",
+        parameters = { parametersOf(activePlayer, profiles) },
+    ),
 ) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
     ProfileScreenContent(
-        papiName = ProfileSampleData.PAPI_NAME,
-        mamiName = ProfileSampleData.MAMI_NAME,
-        papiAvatar = ProfileSampleData.PAPI_AVATAR,
-        mamiAvatar = ProfileSampleData.MAMI_AVATAR,
-        papiPoints = ProfileSampleData.PAPI_POINTS,
-        mamiPoints = ProfileSampleData.MAMI_POINTS,
-        streakDays = ProfileSampleData.STREAK_DAYS,
-        achievements = ProfileSampleData.achievements,
+        papiName = state.papiName,
+        mamiName = state.mamiName,
+        papiAvatar = state.papiAvatar,
+        mamiAvatar = state.mamiAvatar,
+        papiPoints = state.papiPoints,
+        mamiPoints = state.mamiPoints,
+        streakDays = state.streakDays,
+        achievements = state.achievements,
         activePlayer = activePlayer,
         onBack = onBack,
         onOpenPlans = onOpenPlans,

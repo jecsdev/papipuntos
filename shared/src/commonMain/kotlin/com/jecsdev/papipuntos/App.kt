@@ -29,8 +29,10 @@ import com.jecsdev.papipuntos.feature.login.ProfilesScreen
 import com.jecsdev.papipuntos.feature.login.di.loginModule
 import com.jecsdev.papipuntos.feature.profile.PlansScreen
 import com.jecsdev.papipuntos.feature.profile.ProfileScreen
+import com.jecsdev.papipuntos.feature.profile.di.profileModule
 import com.jecsdev.papipuntos.feature.rewards.RedeemScreen
 import com.jecsdev.papipuntos.feature.rewards.RewardsScreen
+import com.jecsdev.papipuntos.feature.rewards.di.rewardsModule
 import com.jecsdev.papipuntos.feature.rewards.model.Reward
 import com.jecsdev.papipuntos.feature.scoreboard.HistoryScreen
 import com.jecsdev.papipuntos.feature.scoreboard.ScoreboardScreen
@@ -57,6 +59,8 @@ fun App() {
                 scoreboardModule,
                 addActionModule,
                 approvalsModule,
+                rewardsModule,
+                profileModule,
             )
         },
     ) {
@@ -131,11 +135,13 @@ private fun ActiveApp(
         )
 
         AppScreen.History -> HistoryScreen(
+            activePlayer = activePlayer,
             profiles = profiles,
             onBack = { screen = AppScreen.Scoreboard },
         )
 
         AppScreen.Rewards -> RewardsScreen(
+            activePlayer = activePlayer,
             onBack = { screen = AppScreen.Scoreboard },
             onRewardSelected = {
                 selectedReward = it
@@ -146,12 +152,14 @@ private fun ActiveApp(
         AppScreen.Redeem -> selectedReward?.let { reward ->
             RedeemScreen(
                 reward = reward,
+                activePlayer = activePlayer,
                 onBack = { screen = AppScreen.Rewards },
             )
         }
 
         AppScreen.Profile -> ProfileScreen(
             activePlayer = activePlayer,
+            profiles = profiles,
             onBack = { screen = AppScreen.Scoreboard },
             onOpenPlans = { screen = AppScreen.Plans },
             onSwitchProfile = onSwitchProfile,

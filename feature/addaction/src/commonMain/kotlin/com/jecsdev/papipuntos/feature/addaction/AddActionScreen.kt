@@ -55,7 +55,10 @@ fun AddActionScreen(
     suggestions: List<SuggestedAction> = AddActionSampleData.suggestions,
     onBack: () -> Unit = {},
     onActionPicked: (Player, SuggestedAction) -> Unit = { _, _ -> },
-    viewModel: AddActionViewModel = koinViewModel(parameters = { parametersOf(activePlayer) }),
+    viewModel: AddActionViewModel = koinViewModel(
+        key = "add-action-${activePlayer.name}",
+        parameters = { parametersOf(activePlayer) },
+    ),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(viewModel) {

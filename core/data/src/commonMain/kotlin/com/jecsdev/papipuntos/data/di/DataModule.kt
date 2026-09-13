@@ -8,11 +8,14 @@ import com.jecsdev.papipuntos.data.auth.RoomAuthRepository
 import com.jecsdev.papipuntos.data.db.AuthDatabase
 import com.jecsdev.papipuntos.data.db.buildAuthDatabase
 import com.jecsdev.papipuntos.data.remote.papiPuntosSupabaseClient
+import com.jecsdev.papipuntos.data.reward.RoomRewardRepository
 import com.jecsdev.papipuntos.data.security.PasswordHasher
 import com.jecsdev.papipuntos.data.security.Pbkdf2PasswordHasher
 import com.jecsdev.papipuntos.domain.action.ActionIdGenerator
 import com.jecsdev.papipuntos.domain.action.ActionRepository
 import com.jecsdev.papipuntos.domain.action.TimeProvider
+import com.jecsdev.papipuntos.domain.reward.RedemptionIdGenerator
+import com.jecsdev.papipuntos.domain.reward.RewardRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -27,6 +30,7 @@ val dataModule = module {
     single { buildAuthDatabase(get()) }
     single { get<AuthDatabase>().authDao() }
     single { get<AuthDatabase>().actionDao() }
+    single { get<AuthDatabase>().rewardDao() }
     single<PasswordHasher> { Pbkdf2PasswordHasher() }
     // The same instance the Android entry point uses to handle the OAuth redirect.
     single { papiPuntosSupabaseClient }
@@ -35,6 +39,8 @@ val dataModule = module {
     single(named("appScope")) { CoroutineScope(SupervisorJob() + Dispatchers.Default) }
     single<AuthRepository> { RoomAuthRepository(get(), get(), get(), get(named("appScope"))) }
     single<ActionRepository> { RoomActionRepository(get()) }
+    single<RewardRepository> { RoomRewardRepository(get()) }
     single<ActionIdGenerator> { RandomActionIdGenerator() }
+    single<RedemptionIdGenerator> { RedemptionIdGenerator { RandomActionIdGenerator().next() } }
     single<TimeProvider> { SystemTimeProvider() }
 }

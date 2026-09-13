@@ -1,9 +1,4 @@
 package com.jecsdev.papipuntos.feature.rewards.model
 
-/** A reward a profile can redeem its points for. */
-data class Reward(
-    val id: String,
-    val label: String,
-    val cost: Int,
-    val emoji: String,
-)
+/** UI compatibility alias; the canonical reward model belongs to core:model. */
+typealias Reward = com.jecsdev.papipuntos.model.Reward

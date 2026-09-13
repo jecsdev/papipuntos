@@ -50,6 +50,18 @@ class ResolveActionUseCaseTest {
     }
 
     @Test
+    fun refuses_a_rejection_without_a_reason() = runBlocking {
+        val repository = RecordingActionRepository(pendingAction())
+        val result = ResolveActionUseCase(repository, TimeProvider { 2_000L })(
+            ResolveActionCommand("action-1", Player.Mami, ActionDecision.Reject, "  "),
+        )
+
+        assertFalse(result.isSuccess)
+        assertEquals("Indica el motivo del rechazo", result.exceptionOrNull()?.message)
+        assertEquals(null, repository.resolvedAction)
+    }
+
+    @Test
     fun refuses_a_review_from_the_beneficiary() = runBlocking {
         val repository = RecordingActionRepository(pendingAction())
         val useCase = ResolveActionUseCase(repository, TimeProvider { 2_000L })
