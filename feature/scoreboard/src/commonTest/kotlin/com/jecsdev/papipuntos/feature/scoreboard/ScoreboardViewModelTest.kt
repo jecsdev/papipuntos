@@ -44,7 +44,7 @@ class ScoreboardViewModelTest {
                 action(id = "approved", beneficiary = Player.Mami, points = 30, status = ActionStatus.APPROVED),
             ),
         )
-        val viewModel = ScoreboardViewModel(repository, profiles())
+        val viewModel = ScoreboardViewModel(repository, Player.Mami, profiles())
 
         val state = viewModel.uiState.first { it.mamiPoints == 30 }
         advanceUntilIdle()

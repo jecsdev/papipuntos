@@ -78,6 +78,7 @@ private fun AppRoot() {
             activePlayer = state.current.player,
             profiles = state.profiles,
             onLogout = { authViewModel.logOut() },
+            onSwitchProfile = { authViewModel.requestProfileSwitch() },
         )
     }
 }
@@ -101,6 +102,7 @@ private fun ActiveApp(
     activePlayer: Player,
     profiles: List<Profile>,
     onLogout: () -> Unit,
+    onSwitchProfile: () -> Unit,
 ) {
     var screen by remember { mutableStateOf(AppScreen.Scoreboard) }
     // The reward picked on the Rewards list, carried into the Redeem screen.
@@ -149,8 +151,10 @@ private fun ActiveApp(
         }
 
         AppScreen.Profile -> ProfileScreen(
+            activePlayer = activePlayer,
             onBack = { screen = AppScreen.Scoreboard },
             onOpenPlans = { screen = AppScreen.Plans },
+            onSwitchProfile = onSwitchProfile,
         )
 
         AppScreen.Plans -> PlansScreen(

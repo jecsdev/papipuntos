@@ -181,6 +181,15 @@ class RoomAuthRepository(
         return Result.success(Unit)
     }
 
+    override suspend fun requestProfileSwitch(): Result<Unit> {
+        val profiles = dao.getProfiles().toDomain()
+        if (profiles.isEmpty()) {
+            return Result.failure(IllegalStateException("No hay perfiles configurados"))
+        }
+        _state.value = AuthState.ProfileSelection(profiles)
+        return Result.success(Unit)
+    }
+
     override suspend fun logOut() {
         // Clear the persisted session so the next cold start requires the password again.
         // Account and profiles stay on disk untouched.

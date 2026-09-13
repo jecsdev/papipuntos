@@ -37,5 +37,9 @@ interface AuthRepository {
         player: Player,
         pin: String,
     ): Result<Unit>
+
+    /** Returns an active session to the PIN-protected profile selector. */
+    suspend fun requestProfileSwitch(): Result<Unit>
+
     suspend fun logOut()
 }

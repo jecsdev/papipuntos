@@ -35,13 +35,16 @@ import com.jecsdev.papipuntos.designsystem.component.ProfileAvatar
 import com.jecsdev.papipuntos.designsystem.icon.PapiPuntosIcons
 import com.jecsdev.papipuntos.designsystem.theme.PapiPuntosTheme
 import com.jecsdev.papipuntos.feature.profile.model.Achievement
+import com.jecsdev.papipuntos.model.Player
 
 /** Production entry point. Profile is a read-only summary, so it just forwards nav. */
 @Composable
 fun ProfileScreen(
+    activePlayer: Player,
     modifier: Modifier = Modifier,
     onBack: () -> Unit = {},
     onOpenPlans: () -> Unit = {},
+    onSwitchProfile: () -> Unit = {},
 ) {
     ProfileScreenContent(
         papiName = ProfileSampleData.PAPI_NAME,
@@ -52,8 +55,10 @@ fun ProfileScreen(
         mamiPoints = ProfileSampleData.MAMI_POINTS,
         streakDays = ProfileSampleData.STREAK_DAYS,
         achievements = ProfileSampleData.achievements,
+        activePlayer = activePlayer,
         onBack = onBack,
         onOpenPlans = onOpenPlans,
+        onSwitchProfile = onSwitchProfile,
         modifier = modifier,
     )
 }
@@ -70,8 +75,10 @@ fun ProfileScreenContent(
     streakDays: Int,
     achievements: List<Achievement>,
     modifier: Modifier = Modifier,
+    activePlayer: Player = Player.Papi,
     onBack: () -> Unit = {},
     onOpenPlans: () -> Unit = {},
+    onSwitchProfile: () -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -93,6 +100,8 @@ fun ProfileScreenContent(
             papiPoints = papiPoints,
             mamiPoints = mamiPoints,
             streakDays = streakDays,
+            activePlayer = activePlayer,
+            onSwitchProfile = onSwitchProfile,
         )
 
         Spacer(Modifier.height(16.dp))
@@ -131,6 +140,8 @@ private fun CoupleHero(
     papiPoints: Int,
     mamiPoints: Int,
     streakDays: Int,
+    activePlayer: Player,
+    onSwitchProfile: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -158,6 +169,7 @@ private fun CoupleHero(
                 name = papiName,
                 points = papiPoints,
                 color = PapiPuntosTheme.colors.papi,
+                onClick = if (activePlayer != Player.Papi) onSwitchProfile else null,
             )
             Text(text = "💞", fontSize = 24.sp)
             PersonSummary(
@@ -165,6 +177,7 @@ private fun CoupleHero(
                 name = mamiName,
                 points = mamiPoints,
                 color = PapiPuntosTheme.colors.mami,
+                onClick = if (activePlayer != Player.Mami) onSwitchProfile else null,
             )
         }
 
@@ -204,8 +217,12 @@ private fun PersonSummary(
     name: String,
     points: Int,
     color: Color,
+    onClick: (() -> Unit)?,
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
         ProfileAvatar(
             emoji = avatar,
             ringColor = color.copy(alpha = 0.4f),
