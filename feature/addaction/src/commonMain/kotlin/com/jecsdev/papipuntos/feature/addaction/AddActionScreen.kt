@@ -2,6 +2,7 @@ package com.jecsdev.papipuntos.feature.addaction
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.content.MediaType.Companion.Text
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -101,6 +102,7 @@ fun AddActionScreenContent(
         PapiPuntosTopBar(title = "Agregar acción", onBack = onBack)
 
         Spacer(Modifier.height(12.dp))
+
         SegmentedToggle(
             options = listOf("💙 Para Papi", "💗 Para Mami"),
             selectedIndex = target.ordinal,
