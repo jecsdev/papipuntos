@@ -22,8 +22,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jecsdev.papipuntos.designsystem.component.PrimaryActionButton
 import com.jecsdev.papipuntos.designsystem.component.SectionHeader
 import com.jecsdev.papipuntos.designsystem.icon.PapiPuntosIcons
@@ -34,20 +34,28 @@ import com.jecsdev.papipuntos.feature.scoreboard.component.ScoreboardBottomBar
 import com.jecsdev.papipuntos.feature.scoreboard.component.ScoreboardHeader
 import com.jecsdev.papipuntos.feature.scoreboard.component.ScoreboardTab
 import com.jecsdev.papipuntos.model.Player
+import com.jecsdev.papipuntos.model.Profile
+import org.koin.core.parameter.parametersOf
 import org.koin.compose.viewmodel.koinViewModel
 
 /** Production entry point: pulls state from the ViewModel and drives [ScoreboardScreenContent]. */
 @Composable
 fun ScoreboardScreen(
-    viewModel: ScoreboardViewModel = koinViewModel(),
+    activePlayer: Player,
+    profiles: List<Profile>,
+    viewModel: ScoreboardViewModel = koinViewModel(
+        parameters = { parametersOf(activePlayer, profiles) },
+    ),
     onAddAction: () -> Unit = {},
     onSeeAllHistory: () -> Unit = {},
     onOpenRewards: () -> Unit = {},
     onOpenProfile: () -> Unit = {},
+    onOpenApprovals: () -> Unit = {},
 ) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
     var selectedTab by remember { mutableStateOf(ScoreboardTab.Home) }
     ScoreboardScreenContent(
-        state = viewModel.uiState,
+        state = state,
         selectedTab = selectedTab,
         // Tabs that own a screen navigate away; Home just stays put.
         onTabSelected = { tab ->
@@ -61,6 +69,7 @@ fun ScoreboardScreen(
         },
         onAddAction = onAddAction,
         onSeeAllHistory = onSeeAllHistory,
+        onOpenApprovals = onOpenApprovals,
     )
 }
 
@@ -73,6 +82,7 @@ fun ScoreboardScreenContent(
     onTabSelected: (ScoreboardTab) -> Unit = {},
     onAddAction: () -> Unit = {},
     onSeeAllHistory: () -> Unit = {},
+    onOpenApprovals: () -> Unit = {},
 ) {
     Box(
         modifier = modifier
@@ -127,6 +137,16 @@ fun ScoreboardScreenContent(
                 }
             }
 
+            if (state.pendingApprovalCount > 0) {
+                Spacer(Modifier.height(24.dp))
+                SectionHeader(
+                    title = "Solicitudes pendientes",
+                    actionText = "Revisar (${state.pendingApprovalCount})",
+                    actionColor = PapiPuntosTheme.colors.mami,
+                    onActionClick = onOpenApprovals,
+                )
+            }
+
             Spacer(Modifier.height(24.dp))
 
             PrimaryActionButton(
@@ -147,17 +167,6 @@ fun ScoreboardScreenContent(
                 .fillMaxWidth()
                 .navigationBarsPadding()
                 .padding(12.dp),
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun ScoreboardScreenPreview() {
-    PapiPuntosTheme {
-        ScoreboardScreenContent(
-            state = ScoreboardSampleData.state,
-            selectedTab = ScoreboardTab.Home,
         )
     }
 }

@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 
 /** UI state for the add-action form. Suggestions stay in the UI layer because they are catalog data. */
 data class AddActionUiState(
-    val target: Player = Player.Papi,
+    val target: Player,
     val query: String = "",
     val isSubmitting: Boolean = false,
     val errorMessage: String? = null,
@@ -32,16 +32,13 @@ sealed interface AddActionEvent {
 /** Converts user intent into a pending point request through the domain use case. */
 class AddActionViewModel(
     private val claimAction: ClaimActionUseCase,
+    activePlayer: Player,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(AddActionUiState())
+    private val _uiState = MutableStateFlow(AddActionUiState(target = activePlayer))
     val uiState = _uiState.asStateFlow()
 
     private val eventChannel = Channel<AddActionEvent>(Channel.BUFFERED)
     val events = eventChannel.receiveAsFlow()
-
-    fun selectTarget(target: Player) {
-        _uiState.update { it.copy(target = target, errorMessage = null) }
-    }
 
     fun updateQuery(query: String) {
         _uiState.update { it.copy(query = query) }

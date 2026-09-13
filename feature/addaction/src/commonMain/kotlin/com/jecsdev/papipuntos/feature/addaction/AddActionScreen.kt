@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,16 +37,18 @@ import com.jecsdev.papipuntos.designsystem.theme.PapiPuntosTheme
 import com.jecsdev.papipuntos.feature.addaction.model.SuggestedAction
 import com.jecsdev.papipuntos.model.Player
 import kotlinx.coroutines.flow.collect
+import org.koin.core.parameter.parametersOf
 import org.koin.compose.viewmodel.koinViewModel
 
 /** Production entry point backed by [AddActionViewModel]. */
 @Composable
 fun AddActionScreen(
+    activePlayer: Player,
     modifier: Modifier = Modifier,
     suggestions: List<SuggestedAction> = AddActionSampleData.suggestions,
     onBack: () -> Unit = {},
     onActionPicked: (Player, SuggestedAction) -> Unit = { _, _ -> },
-    viewModel: AddActionViewModel = koinViewModel(),
+    viewModel: AddActionViewModel = koinViewModel(parameters = { parametersOf(activePlayer) }),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(viewModel) {
@@ -59,11 +62,14 @@ fun AddActionScreen(
         suggestions = suggestions,
         target = uiState.target,
         query = uiState.query,
-        onTargetChange = viewModel::selectTarget,
+        errorMessage = uiState.errorMessage,
+        isSubmitting = uiState.isSubmitting,
+        onTargetChange = {},
         onQueryChange = viewModel::updateQuery,
         onBack = onBack,
         onActionPicked = viewModel::submit,
         modifier = modifier,
+        targetSelectionEnabled = false,
     )
 }
 
@@ -74,10 +80,13 @@ fun AddActionScreenContent(
     target: Player,
     query: String,
     modifier: Modifier = Modifier,
+    errorMessage: String? = null,
+    isSubmitting: Boolean = false,
     onTargetChange: (Player) -> Unit = {},
     onQueryChange: (String) -> Unit = {},
     onBack: () -> Unit = {},
     onActionPicked: (SuggestedAction) -> Unit = {},
+    targetSelectionEnabled: Boolean = true,
 ) {
     val filtered = suggestions.filter { it.label.contains(query, ignoreCase = true) }
     Column(
@@ -101,7 +110,17 @@ fun AddActionScreenContent(
                 Player.Mami -> PapiPuntosTheme.colors.mami
             },
             activeContentColor = Color.White,
+            enabled = targetSelectionEnabled,
         )
+
+        if (!targetSelectionEnabled) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = "Las acciones se registran para tu perfil y las aprueba el otro perfil.",
+                style = PapiPuntosTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
 
         Spacer(Modifier.height(16.dp))
         PapiPuntosTextField(
@@ -120,6 +139,14 @@ fun AddActionScreenContent(
         )
 
         Spacer(Modifier.height(8.dp))
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage,
+                style = PapiPuntosTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+            Spacer(Modifier.height(8.dp))
+        }
         if (filtered.isEmpty()) {
             EmptyResults()
         } else {
@@ -129,7 +156,11 @@ fun AddActionScreenContent(
                         leadingEmoji = action.emoji,
                         leadingContainerColor = MaterialTheme.colorScheme.tertiary,
                         title = action.label,
-                        onClick = { onActionPicked(action) },
+                        onClick = {
+                            if (!isSubmitting) {
+                                onActionPicked(action)
+                            }
+                        },
                     ) {
                         PointsBadge(
                             text = "+${action.points}",

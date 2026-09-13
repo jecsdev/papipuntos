@@ -13,4 +13,5 @@ data class ScoreboardUiState(
     val mamiPoints: Int,
     val goalPoints: Int,
     val recentActions: List<ActionEntry>,
+    val pendingApprovalCount: Int,
 )

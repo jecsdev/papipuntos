@@ -8,13 +8,10 @@ plugins {
 }
 
 kotlin {
-    listOf(
-        iosArm64(),
-        iosSimulatorArm64()
-    )
+    listOf(iosArm64(), iosSimulatorArm64())
 
     androidLibrary {
-        namespace = "com.jecsdev.papipuntos.feature.scoreboard"
+        namespace = "com.jecsdev.papipuntos.feature.approvals"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
 
@@ -28,12 +25,9 @@ kotlin {
     }
 
     sourceSets {
-        androidMain.dependencies {
-            implementation(libs.compose.uiToolingPreview)
-        }
         commonMain.dependencies {
-            implementation(projects.core.model)
             implementation(projects.core.domain)
+            implementation(projects.core.model)
             implementation(projects.core.designsystem)
 
             implementation(libs.compose.runtime)

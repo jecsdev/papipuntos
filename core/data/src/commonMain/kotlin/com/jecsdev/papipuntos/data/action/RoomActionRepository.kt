@@ -15,6 +15,22 @@ class RoomActionRepository(private val dao: ActionDao) : ActionRepository {
         dao.insert(action.toEntity())
     }
 
+    override suspend fun findById(actionId: String): Action? = dao.findById(actionId)?.toDomain()
+
+    override suspend fun resolveIfPending(action: Action): Result<Boolean> = runCatching {
+        dao.resolveIfPending(
+            id = action.id,
+            approver = action.approver.name,
+            status = action.status.name,
+            resolvedAtEpochMillis = requireNotNull(action.resolvedAtEpochMillis),
+            rejectionReason = action.rejectionReason,
+        ) == 1
+    }
+
+    override fun observeAll(): Flow<List<Action>> = dao.observeAll().map { actions ->
+        actions.map(ActionEntity::toDomain)
+    }
+
     override fun observePendingFor(approver: Player): Flow<List<Action>> =
         dao.observePendingFor(approver.name).map { actions -> actions.map(ActionEntity::toDomain) }
 }

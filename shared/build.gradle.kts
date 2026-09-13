@@ -46,6 +46,7 @@ kotlin {
             implementation(projects.feature.scoreboard)
             implementation(projects.feature.login)
             implementation(projects.feature.addaction)
+            implementation(projects.feature.approvals)
             implementation(projects.feature.rewards)
             implementation(projects.feature.profile)
 

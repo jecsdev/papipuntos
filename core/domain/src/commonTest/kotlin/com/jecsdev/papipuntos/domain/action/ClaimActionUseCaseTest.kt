@@ -122,6 +122,12 @@ class ClaimActionUseCaseTest {
             return createResult
         }
 
+        override suspend fun findById(actionId: String): Action? = null
+
+        override suspend fun resolveIfPending(action: Action): Result<Boolean> = Result.success(false)
+
+        override fun observeAll(): Flow<List<Action>> = emptyFlow()
+
         override fun observePendingFor(approver: Player): Flow<List<Action>> = emptyFlow()
     }
 }

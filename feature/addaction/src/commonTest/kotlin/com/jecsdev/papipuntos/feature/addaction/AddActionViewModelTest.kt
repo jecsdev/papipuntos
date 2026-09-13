@@ -41,13 +41,12 @@ class AddActionViewModelTest {
     }
 
     @Test
-    fun submits_the_selected_suggestion_and_emits_a_navigation_event() = runTest {
+    fun submits_a_request_for_the_active_profile_and_emits_a_navigation_event() = runTest {
         val repository = RecordingActionRepository()
-        val viewModel = AddActionViewModel(claimActionUseCase(repository))
+        val viewModel = AddActionViewModel(claimActionUseCase(repository), Player.Mami)
         val suggestion = SuggestedAction("coffee", "Le llevaste café", 30, "☕")
         val event = async { viewModel.events.first() }
 
-        viewModel.selectTarget(Player.Mami)
         viewModel.submit(suggestion)
         advanceUntilIdle()
 
@@ -61,7 +60,7 @@ class AddActionViewModelTest {
     @Test
     fun keeps_the_form_open_and_exposes_an_error_when_persistence_fails() = runTest {
         val repository = RecordingActionRepository(Result.failure(IllegalStateException("Base local no disponible")))
-        val viewModel = AddActionViewModel(claimActionUseCase(repository))
+        val viewModel = AddActionViewModel(claimActionUseCase(repository), Player.Papi)
 
         viewModel.submit(SuggestedAction("meal", "Hiciste la comida", 80, "🍳"))
         advanceUntilIdle()
@@ -72,18 +71,17 @@ class AddActionViewModelTest {
     }
 
     @Test
-    fun updates_search_and_clears_a_previous_error_when_the_target_changes() = runTest {
+    fun updates_search_without_changing_the_active_profile() = runTest {
         val repository = RecordingActionRepository(Result.failure(IllegalStateException("Falló")))
-        val viewModel = AddActionViewModel(claimActionUseCase(repository))
+        val viewModel = AddActionViewModel(claimActionUseCase(repository), Player.Mami)
 
         viewModel.updateQuery("café")
         viewModel.submit(SuggestedAction("coffee", "Le llevaste café", 30, "☕"))
         advanceUntilIdle()
-        viewModel.selectTarget(Player.Mami)
 
         assertEquals("café", viewModel.uiState.value.query)
         assertEquals(Player.Mami, viewModel.uiState.value.target)
-        assertNull(viewModel.uiState.value.errorMessage)
+        assertEquals("Falló", viewModel.uiState.value.errorMessage)
     }
 
     private fun claimActionUseCase(repository: ActionRepository): ClaimActionUseCase = ClaimActionUseCase(
@@ -101,6 +99,12 @@ class AddActionViewModelTest {
             createdAction = action
             return result
         }
+
+        override suspend fun findById(actionId: String): Action? = null
+
+        override suspend fun resolveIfPending(action: Action): Result<Boolean> = Result.success(false)
+
+        override fun observeAll(): Flow<List<Action>> = emptyFlow()
 
         override fun observePendingFor(approver: Player): Flow<List<Action>> = emptyFlow()
     }
