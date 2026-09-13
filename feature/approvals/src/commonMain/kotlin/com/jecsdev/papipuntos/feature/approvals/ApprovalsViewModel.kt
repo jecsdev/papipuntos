@@ -51,6 +51,7 @@ class ApprovalsViewModel(
     fun decide(
         action: Action,
         decision: ActionDecision,
+        rejectionReason: String = "",
     ) {
         if (uiState.value.resolvingActionId != null) return
         viewModelScope.launch {
@@ -61,6 +62,7 @@ class ApprovalsViewModel(
                     actionId = action.id,
                     reviewer = activePlayer,
                     decision = decision,
+                    rejectionReason = rejectionReason,
                 ),
             )
             if (result.isFailure) {

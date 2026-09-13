@@ -13,4 +13,14 @@
     <string name="approvals_approve">Aprobar</string>
     <string name="approvals_saving">Guardando...</string>
     <string name="approvals_empty">No tienes solicitudes pendientes.</string>
+    <string name="approvals_rejection_title">Motivo del rechazo</string>
+    <string name="approvals_rejection_reason">¿Por qué rechazas esta acción?</string>
+    <string name="approvals_rejection_reason_hint">Escribe un motivo</string>
+    <string name="approvals_cancel">Cancelar</string>
+    <string name="action_rejection_available">Toca para ver el motivo</string>
+    <string name="action_rejection_detail_title">Acción rechazada</string>
+    <string name="action_rejection_detail_label">Motivo del rechazo</string>
+    <string name="action_rejection_detail_close">Entendido</string>
+    <string name="redeem_confirm">Canjear recompensa 💖</string>
+    <string name="redeem_saving">Canjeando...</string>
 </resources>

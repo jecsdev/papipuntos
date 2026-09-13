@@ -14,13 +14,14 @@ import kotlinx.coroutines.Dispatchers
 const val AUTH_DB_FILE = "papipuntos_auth.db"
 
 @Database(
-    entities = [AccountEntity::class, ProfileEntity::class, ActionEntity::class],
-    version = 4,
+    entities = [AccountEntity::class, ProfileEntity::class, ActionEntity::class, RewardEntity::class, RedemptionEntity::class],
+    version = 5,
 )
 @ConstructedBy(AuthDatabaseConstructor::class)
 abstract class AuthDatabase : RoomDatabase() {
     abstract fun authDao(): AuthDao
     abstract fun actionDao(): ActionDao
+    abstract fun rewardDao(): RewardDao
 }
 
 // v1 -> v2 adds the persisted login flag. A real migration (not destructive) keeps
@@ -74,6 +75,19 @@ val MIGRATION_3_4: Migration = object : Migration(3, 4) {
     }
 }
 
+// v4 -> v5 adds the local reward catalog and immutable redemption ledger. No existing
+// account, profile, or action table is touched, so users retain every prior record.
+val MIGRATION_4_5: Migration = object : Migration(4, 5) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL(
+            "CREATE TABLE reward_catalog (id TEXT NOT NULL PRIMARY KEY, label TEXT NOT NULL, cost INTEGER NOT NULL, emoji TEXT NOT NULL)",
+        )
+        connection.execSQL(
+            "CREATE TABLE reward_redemption (id TEXT NOT NULL PRIMARY KEY, player TEXT NOT NULL, rewardId TEXT NOT NULL, rewardLabel TEXT NOT NULL, rewardCost INTEGER NOT NULL, rewardEmoji TEXT NOT NULL, reason TEXT NOT NULL, createdAtEpochMillis INTEGER NOT NULL)",
+        )
+    }
+}
+
 // KSP generates the actual for this expect object per platform; the suppression is
 // the documented Room KMP requirement (the compiler cannot see the generated actual).
 @Suppress("NO_ACTUAL_FOR_EXPECT", "KotlinNoActualForExpect")
@@ -87,7 +101,7 @@ expect object AuthDatabaseConstructor : RoomDatabaseConstructor<AuthDatabase> {
  * the auth store is tiny and rarely touched, so the default pool is fine here.
  */
 fun buildAuthDatabase(builder: RoomDatabase.Builder<AuthDatabase>): AuthDatabase = builder
-    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
     .setDriver(BundledSQLiteDriver())
     .setQueryCoroutineContext(Dispatchers.Default)
     .build()

@@ -32,6 +32,9 @@ class ResolveActionUseCase(
         if (action.approver != command.reviewer) {
             return Result.failure(IllegalStateException("No puedes revisar esta acción"))
         }
+        if (command.decision == ActionDecision.Reject && command.rejectionReason.isBlank()) {
+            return Result.failure(IllegalArgumentException("Indica el motivo del rechazo"))
+        }
 
         val resolved = action.copy(
             status = command.decision.toStatus(),

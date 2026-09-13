@@ -36,19 +36,29 @@ import com.jecsdev.papipuntos.designsystem.component.PapiPuntosTopBar
 import com.jecsdev.papipuntos.designsystem.component.PointsBadge
 import com.jecsdev.papipuntos.designsystem.theme.PapiPuntosTheme
 import com.jecsdev.papipuntos.feature.rewards.model.Reward
+import com.jecsdev.papipuntos.model.Player
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 /** Production entry point: owns the active reward filter. */
 @Composable
 fun RewardsScreen(
+    activePlayer: Player,
     modifier: Modifier = Modifier,
-    rewards: List<Reward> = RewardsSampleData.rewards,
-    filters: List<String> = RewardsSampleData.filters,
+    filters: List<String> = RewardUiOptions.filters,
     onBack: () -> Unit = {},
     onRewardSelected: (Reward) -> Unit = {},
+    viewModel: RewardsViewModel = koinViewModel(
+        key = "rewards-${activePlayer.name}",
+        parameters = { parametersOf(activePlayer) },
+    ),
 ) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
     var filter by remember { mutableStateOf(filters.first()) }
     RewardsScreenContent(
-        rewards = rewards,
+        rewards = state.rewards,
+        balance = state.balance,
         filters = filters,
         filter = filter,
         onFilterChange = { filter = it },
@@ -62,6 +72,7 @@ fun RewardsScreen(
 @Composable
 fun RewardsScreenContent(
     rewards: List<Reward>,
+    balance: Int,
     filters: List<String>,
     filter: String,
     modifier: Modifier = Modifier,
@@ -88,6 +99,13 @@ fun RewardsScreenContent(
         )
 
         Spacer(Modifier.height(8.dp))
+        PointsBadge(
+            text = "$balance pts",
+            containerColor = MaterialTheme.colorScheme.onSurface,
+            contentColor = MaterialTheme.colorScheme.surface,
+        )
+
+        Spacer(Modifier.height(8.dp))
         DropdownSelector(
             selected = filter,
             options = filters,
@@ -96,11 +114,18 @@ fun RewardsScreenContent(
 
         Spacer(Modifier.height(20.dp))
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            rewards.forEach { reward ->
+            rewards.filter { reward -> reward.matches(filter) }.forEach { reward ->
                 RewardRow(reward = reward, onClick = { onRewardSelected(reward) })
             }
         }
     }
+}
+
+private fun Reward.matches(filter: String): Boolean = when (filter) {
+    "Hasta 400 pts" -> cost <= 400
+    "Entre 400 y 600 pts" -> cost in 400..600
+    "Premium 600+" -> cost >= 600
+    else -> true
 }
 
 /** A redeemable reward row: gradient tile + label + availability hint + cost pill. */
@@ -165,8 +190,9 @@ private fun RewardsScreenPreview() {
     PapiPuntosTheme {
         RewardsScreenContent(
             rewards = RewardsSampleData.rewards,
-            filters = RewardsSampleData.filters,
-            filter = RewardsSampleData.filters.first(),
+            balance = 730,
+            filters = RewardUiOptions.filters,
+            filter = RewardUiOptions.filters.first(),
         )
     }
 }

@@ -2,10 +2,7 @@ package com.jecsdev.papipuntos.feature.rewards
 
 import com.jecsdev.papipuntos.feature.rewards.model.Reward
 
-/**
- * Hardcoded sample data mirroring the mockup's `REWARDS` and `REASONS`. This port
- * carries no real business logic, only example content for the screens/previews.
- */
+/** Preview-only catalog matching the persisted local catalog. */
 object RewardsSampleData {
     val rewards = listOf(
         Reward("r1", "Noche de película elegida por mí", 500, "🎬"),
@@ -18,7 +15,10 @@ object RewardsSampleData {
         Reward("r8", "Salida de compras sin límite de tiempo", 700, "🛍️"),
     )
 
-    // Filter options for the "Canjear puntos" dropdown.
+}
+
+/** Static presentation choices; rewards themselves always come from local Room data. */
+object RewardUiOptions {
     val filters = listOf(
         "Todas las recompensas",
         "Hasta 400 pts",

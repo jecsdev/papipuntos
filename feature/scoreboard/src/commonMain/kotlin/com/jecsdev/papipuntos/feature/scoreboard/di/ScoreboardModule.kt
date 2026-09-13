@@ -8,6 +8,6 @@ import org.koin.dsl.module
 
 val scoreboardModule = module {
     viewModel { (activePlayer: Player, profiles: List<Profile>) ->
-        ScoreboardViewModel(get(), activePlayer, profiles)
+        ScoreboardViewModel(get(), get(), activePlayer, profiles)
     }
 }

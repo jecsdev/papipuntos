@@ -10,4 +10,5 @@ data class ActionEntry(
     val player: Player,
     val timestamp: String,
     val emoji: String,
+    val rejectionReason: String? = null,
 )

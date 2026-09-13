@@ -1,6 +1,8 @@
 package com.jecsdev.papipuntos.feature.scoreboard
 
 import com.jecsdev.papipuntos.domain.action.ActionRepository
+import com.jecsdev.papipuntos.domain.reward.RedemptionRequest
+import com.jecsdev.papipuntos.domain.reward.RewardRepository
 import com.jecsdev.papipuntos.model.Action
 import com.jecsdev.papipuntos.model.ActionStatus
 import com.jecsdev.papipuntos.model.Player
@@ -44,7 +46,7 @@ class ScoreboardViewModelTest {
                 action(id = "approved", beneficiary = Player.Mami, points = 30, status = ActionStatus.APPROVED),
             ),
         )
-        val viewModel = ScoreboardViewModel(repository, Player.Mami, profiles())
+        val viewModel = ScoreboardViewModel(repository, EmptyRewardRepository, Player.Mami, profiles())
 
         val state = viewModel.uiState.first { it.mamiPoints == 30 }
         advanceUntilIdle()
@@ -92,5 +94,12 @@ class ScoreboardViewModelTest {
         override fun observeAll(): Flow<List<Action>> = actions
 
         override fun observePendingFor(approver: Player): Flow<List<Action>> = emptyFlow()
+    }
+
+    private object EmptyRewardRepository : RewardRepository {
+        override suspend fun seedCatalog(): Result<Unit> = Result.success(Unit)
+        override fun observeCatalog() = emptyFlow<List<com.jecsdev.papipuntos.model.Reward>>()
+        override fun observeRedemptions() = kotlinx.coroutines.flow.flowOf(emptyList<com.jecsdev.papipuntos.model.Redemption>())
+        override suspend fun redeem(request: RedemptionRequest) = error("Not used")
     }
 }

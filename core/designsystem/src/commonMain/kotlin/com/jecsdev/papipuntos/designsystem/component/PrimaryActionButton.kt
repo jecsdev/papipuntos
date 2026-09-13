@@ -40,9 +40,11 @@ fun PrimaryActionButton(
     ),
     shadowColor: Color = gradient.first(),
     shape: RoundedCornerShape = DefaultPapiPuntosShapes.xxl,
+    enabled: Boolean = true,
 ) {
     Surface(
         onClick = onClick,
+        enabled = enabled,
         shape = shape,
         color = Color.Transparent,
         modifier = modifier

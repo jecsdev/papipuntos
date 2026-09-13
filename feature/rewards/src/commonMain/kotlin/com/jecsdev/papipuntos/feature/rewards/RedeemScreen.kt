@@ -37,24 +37,38 @@ import com.jecsdev.papipuntos.designsystem.component.PointsBadge
 import com.jecsdev.papipuntos.designsystem.component.PrimaryActionButton
 import com.jecsdev.papipuntos.designsystem.theme.PapiPuntosTheme
 import com.jecsdev.papipuntos.feature.rewards.model.Reward
+import com.jecsdev.papipuntos.model.Player
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
+import org.jetbrains.compose.resources.stringResource
+import papipuntos.core.designsystem.generated.resources.Res
+import papipuntos.core.designsystem.generated.resources.redeem_confirm
+import papipuntos.core.designsystem.generated.resources.redeem_saving
 
 /** Production entry point: owns the chosen reason and the success state. */
 @Composable
 fun RedeemScreen(
     reward: Reward,
+    activePlayer: Player,
     modifier: Modifier = Modifier,
-    reasons: List<String> = RewardsSampleData.reasons,
+    reasons: List<String> = RewardUiOptions.reasons,
     onBack: () -> Unit = {},
+    viewModel: RedeemViewModel = koinViewModel(
+        key = "redeem-${activePlayer.name}-${reward.id}",
+        parameters = { parametersOf(activePlayer, reward) },
+    ),
 ) {
-    var reason by remember { mutableStateOf(reasons.first()) }
-    var done by remember { mutableStateOf(false) }
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
     RedeemScreenContent(
         reward = reward,
         reasons = reasons,
-        reason = reason,
-        done = done,
-        onReasonChange = { reason = it },
-        onConfirm = { done = true },
+        reason = state.reason,
+        done = state.isComplete,
+        isRedeeming = state.isRedeeming,
+        errorMessage = state.errorMessage,
+        onReasonChange = viewModel::updateReason,
+        onConfirm = viewModel::redeem,
         onBack = onBack,
         modifier = modifier,
     )
@@ -67,6 +81,8 @@ fun RedeemScreenContent(
     reasons: List<String>,
     reason: String,
     done: Boolean,
+    isRedeeming: Boolean = false,
+    errorMessage: String? = null,
     modifier: Modifier = Modifier,
     onReasonChange: (String) -> Unit = {},
     onConfirm: () -> Unit = {},
@@ -102,13 +118,22 @@ fun RedeemScreenContent(
 
         Spacer(Modifier.height(24.dp))
         PrimaryActionButton(
-            text = "Canjear recompensa 💖",
+            text = stringResource(if (isRedeeming) Res.string.redeem_saving else Res.string.redeem_confirm),
             onClick = onConfirm,
+            enabled = reason.isNotBlank() && !isRedeeming && !done,
             gradient = listOf(PapiPuntosTheme.colors.mami, MaterialTheme.colorScheme.primary),
         )
 
         AnimatedVisibility(visible = done) {
             SuccessBanner(modifier = Modifier.padding(top = 16.dp))
+        }
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage,
+                style = PapiPuntosTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(top = 12.dp),
+            )
         }
     }
 }
@@ -188,8 +213,8 @@ private fun RedeemScreenPreview() {
     PapiPuntosTheme {
         RedeemScreenContent(
             reward = RewardsSampleData.rewards.first(),
-            reasons = RewardsSampleData.reasons,
-            reason = RewardsSampleData.reasons.first(),
+            reasons = RewardUiOptions.reasons,
+            reason = RewardUiOptions.reasons.first(),
             done = false,
         )
     }

@@ -66,7 +66,11 @@ class ApprovalsViewModelTest {
         )
         viewModel.uiState.first { it.actions.size == 1 }
 
-        viewModel.decide(repository.pendingAction, com.jecsdev.papipuntos.domain.action.ActionDecision.Reject)
+        viewModel.decide(
+            repository.pendingAction,
+            com.jecsdev.papipuntos.domain.action.ActionDecision.Reject,
+            rejectionReason = "No se completó la tarea",
+        )
         val state = viewModel.uiState.first { it.errorMessage != null }
 
         assertEquals("Base local no disponible", state.errorMessage)

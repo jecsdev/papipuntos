@@ -14,16 +14,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.jecsdev.papipuntos.designsystem.component.ProfileAvatar
 import com.jecsdev.papipuntos.designsystem.theme.PapiPuntosTheme
+import com.jecsdev.papipuntos.model.Player
 
 /**
- * Top of the scoreboard: greeting + screen title on the left, the couple's
- * overlapping avatars on the right.
+ * Top of the scoreboard: the active profile's greeting and avatar, with the
+ * couple context still represented by the screen title and score cards.
  */
 @Composable
 fun ScoreboardHeader(
-    coupleNames: String,
-    papiAvatar: String,
-    mamiAvatar: String,
+    activeName: String,
+    activeAvatar: String,
+    activePlayer: Player,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -33,7 +34,7 @@ fun ScoreboardHeader(
     ) {
         Column {
             Text(
-                text = "¡Hola, $coupleNames! 💕",
+                text = "¡Hola, $activeName!",
                 style = PapiPuntosTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -45,10 +46,12 @@ fun ScoreboardHeader(
             )
         }
 
-        // Overlapping avatars (mockup: `flex -space-x-2`), papi drawn over mami.
-        Row(horizontalArrangement = Arrangement.spacedBy((-8).dp)) {
-            ProfileAvatar(emoji = mamiAvatar, ringColor = PapiPuntosTheme.colors.mami)
-            ProfileAvatar(emoji = papiAvatar, ringColor = PapiPuntosTheme.colors.papi)
-        }
+        ProfileAvatar(
+            emoji = activeAvatar,
+            ringColor = when (activePlayer) {
+                Player.Papi -> PapiPuntosTheme.colors.papi
+                Player.Mami -> PapiPuntosTheme.colors.mami
+            },
+        )
     }
 }

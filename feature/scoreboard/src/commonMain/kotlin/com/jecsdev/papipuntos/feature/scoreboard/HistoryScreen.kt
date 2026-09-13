@@ -45,9 +45,13 @@ enum class HistoryFilter(
 /** Production entry point: owns the active filter. */
 @Composable
 fun HistoryScreen(
+    activePlayer: Player,
     profiles: List<Profile>,
     modifier: Modifier = Modifier,
-    viewModel: ScoreboardViewModel = koinViewModel(parameters = { parametersOf(profiles) }),
+    viewModel: ScoreboardViewModel = koinViewModel(
+        key = "scoreboard-${activePlayer.name}",
+        parameters = { parametersOf(activePlayer, profiles) },
+    ),
     onBack: () -> Unit = {},
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
