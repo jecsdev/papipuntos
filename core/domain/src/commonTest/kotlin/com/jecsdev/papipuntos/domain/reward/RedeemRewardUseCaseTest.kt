@@ -1,9 +1,9 @@
 package com.jecsdev.papipuntos.domain.reward
 
 import com.jecsdev.papipuntos.domain.action.TimeProvider
+import com.jecsdev.papipuntos.model.Player
 import com.jecsdev.papipuntos.model.Redemption
 import com.jecsdev.papipuntos.model.Reward
-import com.jecsdev.papipuntos.model.Player
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.runBlocking
@@ -47,7 +47,16 @@ class RedeemRewardUseCaseTest {
         override suspend fun redeem(request: RedemptionRequest): Result<Redemption> {
             this.request = request
             return Result.success(
-                Redemption(request.id, request.player, request.rewardId, "Test", 50, "✨", request.reason, request.createdAtEpochMillis),
+                Redemption(
+                    request.id,
+                    request.player,
+                    request.rewardId,
+                    "Test",
+                    50,
+                    "✨",
+                    request.reason,
+                    request.createdAtEpochMillis,
+                ),
             )
         }
     }

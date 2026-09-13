@@ -1,7 +1,7 @@
 package com.jecsdev.papipuntos.feature.approvals
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -45,10 +45,10 @@ import papipuntos.core.designsystem.generated.resources.approvals_approve
 import papipuntos.core.designsystem.generated.resources.approvals_cancel
 import papipuntos.core.designsystem.generated.resources.approvals_description
 import papipuntos.core.designsystem.generated.resources.approvals_empty
+import papipuntos.core.designsystem.generated.resources.approvals_reject
 import papipuntos.core.designsystem.generated.resources.approvals_rejection_reason
 import papipuntos.core.designsystem.generated.resources.approvals_rejection_reason_hint
 import papipuntos.core.designsystem.generated.resources.approvals_rejection_title
-import papipuntos.core.designsystem.generated.resources.approvals_reject
 import papipuntos.core.designsystem.generated.resources.approvals_request_subtitle
 import papipuntos.core.designsystem.generated.resources.approvals_saving
 import papipuntos.core.designsystem.generated.resources.approvals_title

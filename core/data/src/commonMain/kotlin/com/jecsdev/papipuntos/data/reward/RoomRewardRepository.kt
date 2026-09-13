@@ -25,13 +25,15 @@ class RoomRewardRepository(private val dao: RewardDao) : RewardRepository {
     }
 
     override suspend fun redeem(request: RedemptionRequest): Result<Redemption> = runCatching {
-        when (val attempt = dao.redeemIfAffordable(
-            id = request.id,
-            rewardId = request.rewardId,
-            player = request.player.name,
-            reason = request.reason,
-            createdAtEpochMillis = request.createdAtEpochMillis,
-        )) {
+        when (
+            val attempt = dao.redeemIfAffordable(
+                id = request.id,
+                rewardId = request.rewardId,
+                player = request.player.name,
+                reason = request.reason,
+                createdAtEpochMillis = request.createdAtEpochMillis,
+            )
+        ) {
             is RedemptionAttempt.Success -> attempt.redemption.toDomain()
             RedemptionAttempt.MissingReward -> throw IllegalArgumentException("Recompensa no encontrada")
             RedemptionAttempt.InsufficientPoints -> throw IllegalStateException("No tienes puntos suficientes")

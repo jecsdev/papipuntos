@@ -14,7 +14,6 @@ object RewardsSampleData {
         Reward("r7", "Noche de gaming sin reclamos", 450, "🎮"),
         Reward("r8", "Salida de compras sin límite de tiempo", 700, "🛍️"),
     )
-
 }
 
 /** Static presentation choices; rewards themselves always come from local Room data. */

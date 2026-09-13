@@ -1,9 +1,9 @@
 package com.jecsdev.papipuntos.feature.rewards
 
 import com.jecsdev.papipuntos.domain.action.TimeProvider
+import com.jecsdev.papipuntos.domain.reward.RedeemRewardUseCase
 import com.jecsdev.papipuntos.domain.reward.RedemptionIdGenerator
 import com.jecsdev.papipuntos.domain.reward.RedemptionRequest
-import com.jecsdev.papipuntos.domain.reward.RedeemRewardUseCase
 import com.jecsdev.papipuntos.domain.reward.RewardRepository
 import com.jecsdev.papipuntos.model.Player
 import com.jecsdev.papipuntos.model.Redemption
@@ -27,6 +27,7 @@ class RedeemViewModelTest {
     private val dispatcher = UnconfinedTestDispatcher()
 
     @BeforeTest fun setUp() = Dispatchers.setMain(dispatcher)
+
     @AfterTest fun tearDown() = Dispatchers.resetMain()
 
     @Test
@@ -36,7 +37,13 @@ class RedeemViewModelTest {
         val viewModel = RedeemViewModel(
             activePlayer = Player.Mami,
             reward = reward,
-            redeemReward = RedeemRewardUseCase(repository, RedemptionIdGenerator { "redemption-1" }, TimeProvider { 50L }),
+            redeemReward = RedeemRewardUseCase(
+                repository,
+                RedemptionIdGenerator {
+                    "redemption-1"
+                },
+                TimeProvider { 50L },
+            ),
         )
 
         viewModel.updateReason("Celebración especial")
@@ -54,7 +61,18 @@ class RedeemViewModelTest {
         override fun observeRedemptions(): Flow<List<Redemption>> = emptyFlow()
         override suspend fun redeem(request: RedemptionRequest): Result<Redemption> {
             this.request = request
-            return Result.success(Redemption(request.id, request.player, request.rewardId, "Película", 500, "🎬", request.reason, request.createdAtEpochMillis))
+            return Result.success(
+                Redemption(
+                    request.id,
+                    request.player,
+                    request.rewardId,
+                    "Película",
+                    500,
+                    "🎬",
+                    request.reason,
+                    request.createdAtEpochMillis,
+                ),
+            )
         }
     }
 }

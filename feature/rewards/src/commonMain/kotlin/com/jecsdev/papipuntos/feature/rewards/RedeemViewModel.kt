@@ -35,7 +35,9 @@ class RedeemViewModel(
             _uiState.update { it.copy(isRedeeming = true, errorMessage = null) }
             redeemReward(RedeemRewardCommand(reward.id, activePlayer, _uiState.value.reason))
                 .onSuccess { _uiState.update { state -> state.copy(isRedeeming = false, isComplete = true) } }
-                .onFailure { error -> _uiState.update { state -> state.copy(isRedeeming = false, errorMessage = error.message) } }
+                .onFailure { error ->
+                    _uiState.update { state -> state.copy(isRedeeming = false, errorMessage = error.message) }
+                }
         }
     }
 }

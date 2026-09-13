@@ -3,12 +3,12 @@ package com.jecsdev.papipuntos.data.di
 import com.jecsdev.papipuntos.data.action.RandomActionIdGenerator
 import com.jecsdev.papipuntos.data.action.RoomActionRepository
 import com.jecsdev.papipuntos.data.action.SystemTimeProvider
-import com.jecsdev.papipuntos.data.reward.RoomRewardRepository
 import com.jecsdev.papipuntos.data.auth.AuthRepository
 import com.jecsdev.papipuntos.data.auth.RoomAuthRepository
 import com.jecsdev.papipuntos.data.db.AuthDatabase
 import com.jecsdev.papipuntos.data.db.buildAuthDatabase
 import com.jecsdev.papipuntos.data.remote.papiPuntosSupabaseClient
+import com.jecsdev.papipuntos.data.reward.RoomRewardRepository
 import com.jecsdev.papipuntos.data.security.PasswordHasher
 import com.jecsdev.papipuntos.data.security.Pbkdf2PasswordHasher
 import com.jecsdev.papipuntos.domain.action.ActionIdGenerator

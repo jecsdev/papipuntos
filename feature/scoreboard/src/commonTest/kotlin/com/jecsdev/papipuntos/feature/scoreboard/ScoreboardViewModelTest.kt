@@ -99,7 +99,8 @@ class ScoreboardViewModelTest {
     private object EmptyRewardRepository : RewardRepository {
         override suspend fun seedCatalog(): Result<Unit> = Result.success(Unit)
         override fun observeCatalog() = emptyFlow<List<com.jecsdev.papipuntos.model.Reward>>()
-        override fun observeRedemptions() = kotlinx.coroutines.flow.flowOf(emptyList<com.jecsdev.papipuntos.model.Redemption>())
+        override fun observeRedemptions() =
+            kotlinx.coroutines.flow.flowOf(emptyList<com.jecsdev.papipuntos.model.Redemption>())
         override suspend fun redeem(request: RedemptionRequest) = error("Not used")
     }
 }

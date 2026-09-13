@@ -14,7 +14,13 @@ import kotlinx.coroutines.Dispatchers
 const val AUTH_DB_FILE = "papipuntos_auth.db"
 
 @Database(
-    entities = [AccountEntity::class, ProfileEntity::class, ActionEntity::class, RewardEntity::class, RedemptionEntity::class],
+    entities = [
+        AccountEntity::class,
+        ProfileEntity::class,
+        ActionEntity::class,
+        RewardEntity::class,
+        RedemptionEntity::class,
+    ],
     version = 5,
 )
 @ConstructedBy(AuthDatabaseConstructor::class)

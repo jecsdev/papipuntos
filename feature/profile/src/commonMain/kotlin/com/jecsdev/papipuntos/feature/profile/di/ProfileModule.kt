@@ -7,5 +7,7 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val profileModule = module {
-    viewModel { (activePlayer: Player, profiles: List<Profile>) -> ProfileViewModel(activePlayer, profiles, get(), get()) }
+    viewModel { (activePlayer: Player, profiles: List<Profile>) ->
+        ProfileViewModel(activePlayer, profiles, get(), get())
+    }
 }

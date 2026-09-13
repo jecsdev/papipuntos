@@ -34,7 +34,10 @@ class ProfileViewModel(
     private val papi = profiles.firstOrNull { it.player == Player.Papi }
     private val mami = profiles.firstOrNull { it.player == Player.Mami }
 
-    val uiState = combine(actionRepository.observeAll(), rewardRepository.observeRedemptions()) { actions, redemptions ->
+    val uiState = combine(actionRepository.observeAll(), rewardRepository.observeRedemptions()) {
+            actions,
+            redemptions,
+        ->
         val approved = actions.filter { it.status == ActionStatus.APPROVED }
         ProfileUiState(
             papiName = papi?.name ?: "Papi",
@@ -55,7 +58,8 @@ class ProfileViewModel(
 
     private fun List<Action>.streakDays(): Int {
         val days = map { it.createdAtEpochMillis / MILLIS_PER_DAY }.distinct().sortedDescending()
-        return days.zipWithNext().takeWhile { (later, earlier) -> later - earlier == 1L }.size + if (days.isEmpty()) 0 else 1
+        return days.zipWithNext().takeWhile { (later, earlier) -> later - earlier == 1L }.size +
+            if (days.isEmpty()) 0 else 1
     }
 
     private fun List<Action>.achievementsFor(player: Player): List<Achievement> {
@@ -63,9 +67,25 @@ class ProfileViewModel(
         return buildList {
             if (mine.size >= 7) add(Achievement("🏆", "Primera semana"))
             if (mine.size >= 100) add(Achievement("💯", "100 acciones"))
-            if (mine.any { it.label.contains("masaje", ignoreCase = true) }) add(Achievement("💆", "Maestro del masaje"))
-            if (mine.any { it.label.contains("cocina", ignoreCase = true) || it.emoji == "🍳" }) add(Achievement("🍳", "Chef de la casa"))
-            if (mine.any { it.label.contains("cita", ignoreCase = true) || it.label.contains("salida", ignoreCase = true) }) add(Achievement("💕", "Cita perfecta"))
+            if (mine.any {
+                    it.label.contains("masaje", ignoreCase = true)
+                }
+            ) {
+                add(Achievement("💆", "Maestro del masaje"))
+            }
+            if (mine.any {
+                    it.label.contains("cocina", ignoreCase = true) || it.emoji == "🍳"
+                }
+            ) {
+                add(Achievement("🍳", "Chef de la casa"))
+            }
+            if (mine.any {
+                    it.label.contains("cita", ignoreCase = true) ||
+                        it.label.contains("salida", ignoreCase = true)
+                }
+            ) {
+                add(Achievement("💕", "Cita perfecta"))
+            }
             if (mine.any { it.label.contains("noche", ignoreCase = true) }) add(Achievement("🌙", "Detalle nocturno"))
         }
     }

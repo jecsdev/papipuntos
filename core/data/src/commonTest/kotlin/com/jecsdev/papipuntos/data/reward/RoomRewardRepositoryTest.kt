@@ -51,11 +51,14 @@ class RoomRewardRepositoryTest {
         }
 
         override fun observeCatalog(): Flow<List<RewardEntity>> = catalog
-        override suspend fun findReward(rewardId: String): RewardEntity? = catalog.value.firstOrNull { it.id == rewardId }
+        override suspend fun findReward(rewardId: String): RewardEntity? =
+            catalog.value.firstOrNull { it.id == rewardId }
         override fun observeRedemptions(): Flow<List<RedemptionEntity>> = redemptions
         override suspend fun approvedPointsFor(player: String): Int = 1_000
-        override suspend fun redeemedPointsFor(player: String): Int = redemptions.value.filter { it.player == player }.sumOf { it.rewardCost }
-        override suspend fun insertRedemption(redemption: RedemptionEntity) { redemptions.value += redemption }
-
+        override suspend fun redeemedPointsFor(player: String): Int =
+            redemptions.value.filter { it.player == player }.sumOf { it.rewardCost }
+        override suspend fun insertRedemption(redemption: RedemptionEntity) {
+            redemptions.value += redemption
+        }
     }
 }
