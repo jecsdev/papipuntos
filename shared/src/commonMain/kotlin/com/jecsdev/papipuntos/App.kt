@@ -1,11 +1,14 @@
 package com.jecsdev.papipuntos
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -14,6 +17,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.jecsdev.papipuntos.data.db.platformAuthModule
 import com.jecsdev.papipuntos.data.di.dataModule
 import com.jecsdev.papipuntos.designsystem.theme.PapiPuntosTheme
@@ -38,13 +46,35 @@ import com.jecsdev.papipuntos.feature.scoreboard.HistoryScreen
 import com.jecsdev.papipuntos.feature.scoreboard.ScoreboardScreen
 import com.jecsdev.papipuntos.feature.scoreboard.di.scoreboardModule
 import com.jecsdev.papipuntos.model.AuthState
-import com.jecsdev.papipuntos.model.Player
-import com.jecsdev.papipuntos.model.Profile
 import org.koin.compose.KoinApplication
 import org.koin.compose.viewmodel.koinViewModel
 
-/** Screens the lightweight stand-in router can show once a profile is active. */
-private enum class AppScreen { Scoreboard, AddAction, Approvals, History, Rewards, Redeem, Profile, Plans }
+/** Stable routes for the app navigation graph. */
+private object AppRoute {
+    const val SPLASH = "splash"
+    const val LOGIN = "login"
+    const val PROFILE_SETUP = "profile-setup"
+    const val PROFILE_SELECTION = "profile-selection"
+    const val SCOREBOARD = "scoreboard"
+    const val ADD_ACTION = "add-action"
+    const val APPROVALS = "approvals"
+    const val HISTORY = "history"
+    const val REWARDS = "rewards"
+    const val REDEEM = "redeem"
+    const val PROFILE = "profile"
+    const val PLANS = "plans"
+
+    val ACTIVE_ROUTES = setOf(
+        SCOREBOARD,
+        ADD_ACTION,
+        APPROVALS,
+        HISTORY,
+        REWARDS,
+        REDEEM,
+        PROFILE,
+        PLANS,
+    )
+}
 
 @Composable
 @Preview
@@ -73,17 +103,145 @@ fun App() {
 private fun AppRoot() {
     val authViewModel: AuthViewModel = koinViewModel()
     val authState by authViewModel.authState.collectAsStateWithLifecycle()
-    when (val state = authState) {
-        AuthState.Loading -> SplashScreen()
-        AuthState.LoggedOut -> LoginScreen()
-        AuthState.NeedsSetup -> ProfileSetupScreen()
-        is AuthState.ProfileSelection -> ProfilesScreen(profiles = state.profiles)
-        is AuthState.Active -> ActiveApp(
-            activePlayer = state.current.player,
-            profiles = state.profiles,
-            onLogout = { authViewModel.logOut() },
-            onSwitchProfile = { authViewModel.requestProfileSwitch() },
-        )
+    val navController = rememberNavController()
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+    var selectedReward by remember { mutableStateOf<Reward?>(null) }
+
+    LaunchedEffect(authState) {
+        when (authState) {
+            AuthState.Loading -> navController.replaceWith(AppRoute.SPLASH)
+            AuthState.LoggedOut -> navController.replaceWith(AppRoute.LOGIN)
+            AuthState.NeedsSetup -> navController.replaceWith(AppRoute.PROFILE_SETUP)
+            is AuthState.ProfileSelection -> navController.replaceWith(AppRoute.PROFILE_SELECTION)
+            is AuthState.Active -> if (currentRoute !in AppRoute.ACTIVE_ROUTES) {
+                navController.replaceWith(AppRoute.SCOREBOARD)
+            }
+        }
+    }
+
+    NavHost(
+        navController = navController,
+        startDestination = AppRoute.SPLASH,
+        enterTransition = {
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                animationSpec = tween(),
+            )
+        },
+        exitTransition = {
+            slideOutOfContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                animationSpec = tween(),
+            )
+        },
+        popEnterTransition = {
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                animationSpec = tween(),
+            )
+        },
+        popExitTransition = {
+            slideOutOfContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                animationSpec = tween(),
+            )
+        },
+    ) {
+        composable(AppRoute.SPLASH) { SplashScreen() }
+        composable(AppRoute.LOGIN) { LoginScreen() }
+        composable(AppRoute.PROFILE_SETUP) { ProfileSetupScreen() }
+        composable(AppRoute.PROFILE_SELECTION) {
+            (authState as? AuthState.ProfileSelection)?.let { state ->
+                ProfilesScreen(profiles = state.profiles)
+            }
+        }
+        composable(AppRoute.SCOREBOARD) {
+            (authState as? AuthState.Active)?.let { state ->
+                ScoreboardScreen(
+                    activePlayer = state.current.player,
+                    profiles = state.profiles,
+                    onAddAction = { navController.navigate(AppRoute.ADD_ACTION) },
+                    onSeeAllHistory = { navController.navigate(AppRoute.HISTORY) },
+                    onOpenRewards = { navController.navigate(AppRoute.REWARDS) },
+                    onOpenProfile = { navController.navigate(AppRoute.PROFILE) },
+                    onOpenApprovals = { navController.navigate(AppRoute.APPROVALS) },
+                )
+            }
+        }
+        composable(AppRoute.ADD_ACTION) {
+            (authState as? AuthState.Active)?.let { state ->
+                AddActionScreen(
+                    activePlayer = state.current.player,
+                    onBack = { navController.popBackStack() },
+                    onActionPicked = { _, _ -> navController.popBackStack() },
+                )
+            }
+        }
+        composable(AppRoute.APPROVALS) {
+            (authState as? AuthState.Active)?.let { state ->
+                ApprovalsScreen(
+                    activePlayer = state.current.player,
+                    onBack = { navController.popBackStack() },
+                )
+            }
+        }
+        composable(AppRoute.HISTORY) {
+            (authState as? AuthState.Active)?.let { state ->
+                HistoryScreen(
+                    activePlayer = state.current.player,
+                    profiles = state.profiles,
+                    onBack = { navController.popBackStack() },
+                )
+            }
+        }
+        composable(AppRoute.REWARDS) {
+            (authState as? AuthState.Active)?.let { state ->
+                RewardsScreen(
+                    activePlayer = state.current.player,
+                    onBack = { navController.popBackStack() },
+                    onRewardSelected = { reward ->
+                        selectedReward = reward
+                        navController.navigate(AppRoute.REDEEM)
+                    },
+                )
+            }
+        }
+        composable(AppRoute.REDEEM) {
+            (authState as? AuthState.Active)?.let { state ->
+                selectedReward?.let { reward ->
+                    RedeemScreen(
+                        reward = reward,
+                        activePlayer = state.current.player,
+                        onBack = { navController.popBackStack() },
+                    )
+                }
+            }
+        }
+        composable(AppRoute.PROFILE) {
+            (authState as? AuthState.Active)?.let { state ->
+                ProfileScreen(
+                    activePlayer = state.current.player,
+                    profiles = state.profiles,
+                    onBack = { navController.popBackStack() },
+                    onOpenPlans = { navController.navigate(AppRoute.PLANS) },
+                    onSwitchProfile = { authViewModel.requestProfileSwitch() },
+                )
+            }
+        }
+        composable(AppRoute.PLANS) {
+            PlansScreen(
+                onBack = { navController.popBackStack() },
+                onStartTrial = { navController.popBackStack() },
+                onLogout = { authViewModel.logOut() },
+            )
+        }
+    }
+}
+
+private fun NavHostController.replaceWith(route: String) {
+    navigate(route) {
+        popUpTo(graph.id) { inclusive = true }
+        launchSingleTop = true
     }
 }
 
@@ -94,82 +252,5 @@ private fun SplashScreen() {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
         }
-    }
-}
-
-/**
- * Post-auth sub-router. Always starts on [AppScreen.Scoreboard] on every entry into
- * `Active` (e.g. after logging back in) — accepted for this stage, no screen memory yet.
- */
-@Composable
-private fun ActiveApp(
-    activePlayer: Player,
-    profiles: List<Profile>,
-    onLogout: () -> Unit,
-    onSwitchProfile: () -> Unit,
-) {
-    var screen by remember { mutableStateOf(AppScreen.Scoreboard) }
-    // The reward picked on the Rewards list, carried into the Redeem screen.
-    var selectedReward by remember { mutableStateOf<Reward?>(null) }
-    when (screen) {
-        AppScreen.Scoreboard -> ScoreboardScreen(
-            activePlayer = activePlayer,
-            profiles = profiles,
-            onAddAction = { screen = AppScreen.AddAction },
-            onSeeAllHistory = { screen = AppScreen.History },
-            onOpenRewards = { screen = AppScreen.Rewards },
-            onOpenProfile = { screen = AppScreen.Profile },
-            onOpenApprovals = { screen = AppScreen.Approvals },
-        )
-
-        AppScreen.AddAction -> AddActionScreen(
-            activePlayer = activePlayer,
-            onBack = { screen = AppScreen.Scoreboard },
-            // Picking an action returns to the board (logging is out of scope here).
-            onActionPicked = { _, _ -> screen = AppScreen.Scoreboard },
-        )
-
-        AppScreen.Approvals -> ApprovalsScreen(
-            activePlayer = activePlayer,
-            onBack = { screen = AppScreen.Scoreboard },
-        )
-
-        AppScreen.History -> HistoryScreen(
-            activePlayer = activePlayer,
-            profiles = profiles,
-            onBack = { screen = AppScreen.Scoreboard },
-        )
-
-        AppScreen.Rewards -> RewardsScreen(
-            activePlayer = activePlayer,
-            onBack = { screen = AppScreen.Scoreboard },
-            onRewardSelected = {
-                selectedReward = it
-                screen = AppScreen.Redeem
-            },
-        )
-
-        AppScreen.Redeem -> selectedReward?.let { reward ->
-            RedeemScreen(
-                reward = reward,
-                activePlayer = activePlayer,
-                onBack = { screen = AppScreen.Rewards },
-            )
-        }
-
-        AppScreen.Profile -> ProfileScreen(
-            activePlayer = activePlayer,
-            profiles = profiles,
-            onBack = { screen = AppScreen.Scoreboard },
-            onOpenPlans = { screen = AppScreen.Plans },
-            onSwitchProfile = onSwitchProfile,
-        )
-
-        AppScreen.Plans -> PlansScreen(
-            onBack = { screen = AppScreen.Profile },
-            // Starting the trial would flip premium on; here it just returns.
-            onStartTrial = { screen = AppScreen.Profile },
-            onLogout = onLogout,
-        )
     }
 }
