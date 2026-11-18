@@ -8,6 +8,6 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val rewardsModule = module {
-    viewModel { (activePlayer: Player) -> RewardsViewModel(activePlayer, get(), get()) }
+    viewModel { (activePlayer: Player) -> RewardsViewModel(activePlayer, get(), get(), get()) }
     viewModel { (activePlayer: Player, reward: Reward) -> RedeemViewModel(activePlayer, reward, get()) }
 }

@@ -84,6 +84,25 @@ class AddActionViewModelTest {
         assertEquals("Falló", viewModel.uiState.value.errorMessage)
     }
 
+    @Test
+    fun custom_pending_action_uses_entered_points_and_requires_valid_input() = runTest {
+        val repository = RecordingActionRepository()
+        val viewModel = AddActionViewModel(claimActionUseCase(repository), Player.Papi)
+        val event = async { viewModel.events.first() }
+
+        viewModel.submitCustom("   ", "25", "✨")
+        assertEquals("Escribe el pendiente", viewModel.uiState.value.errorMessage)
+        assertNull(repository.createdAction)
+
+        viewModel.submitCustom("  Regué las plantas  ", "25", "🌱")
+        advanceUntilIdle()
+
+        assertEquals("Regué las plantas", repository.createdAction?.label)
+        assertEquals(25, repository.createdAction?.points)
+        assertEquals(Player.Mami, repository.createdAction?.approver)
+        assertEquals("🌱", (event.await() as AddActionEvent.Submitted).suggestion.emoji)
+    }
+
     private fun claimActionUseCase(repository: ActionRepository): ClaimActionUseCase = ClaimActionUseCase(
         repository = repository,
         idGenerator = ActionIdGenerator { "action-id" },

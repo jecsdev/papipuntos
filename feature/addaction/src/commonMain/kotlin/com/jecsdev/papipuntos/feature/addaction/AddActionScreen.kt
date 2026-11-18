@@ -15,9 +15,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,6 +65,10 @@ fun AddActionScreen(
     ),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var showCustomForm by rememberSaveable { mutableStateOf(false) }
+    var customLabel by rememberSaveable { mutableStateOf("") }
+    var customPoints by rememberSaveable { mutableStateOf("") }
+    var customEmoji by rememberSaveable { mutableStateOf("") }
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {
@@ -72,15 +80,36 @@ fun AddActionScreen(
         suggestions = suggestions,
         target = uiState.target,
         query = uiState.query,
-        errorMessage = uiState.errorMessage,
+        errorMessage = uiState.errorMessage.takeUnless { showCustomForm },
         isSubmitting = uiState.isSubmitting,
         onTargetChange = {},
         onQueryChange = viewModel::updateQuery,
         onBack = onBack,
         onActionPicked = viewModel::submit,
+        onCreateCustom = {
+            viewModel.clearError()
+            showCustomForm = true
+        },
         modifier = modifier,
         targetSelectionEnabled = false,
     )
+    if (showCustomForm) {
+        NewPendingActionDialog(
+            label = customLabel,
+            points = customPoints,
+            emoji = customEmoji,
+            isSubmitting = uiState.isSubmitting,
+            errorMessage = uiState.errorMessage,
+            onLabelChange = { customLabel = it },
+            onPointsChange = { customPoints = it },
+            onEmojiChange = { customEmoji = it },
+            onSubmit = { viewModel.submitCustom(customLabel, customPoints, customEmoji) },
+            onDismiss = {
+                viewModel.clearError()
+                showCustomForm = false
+            },
+        )
+    }
 }
 
 /** Stateless, preview-friendly content with flat parameters. */
@@ -96,6 +125,7 @@ fun AddActionScreenContent(
     onQueryChange: (String) -> Unit = {},
     onBack: () -> Unit = {},
     onActionPicked: (SuggestedAction) -> Unit = {},
+    onCreateCustom: () -> Unit = {},
     targetSelectionEnabled: Boolean = true,
 ) {
     val filtered = suggestions.filter { it.label.contains(query, ignoreCase = true) }
@@ -142,6 +172,9 @@ fun AddActionScreenContent(
         )
 
         Spacer(Modifier.height(20.dp))
+        TextButton(onClick = onCreateCustom, modifier = Modifier.fillMaxWidth()) {
+            Text("+ Crear pendiente con puntos")
+        }
         Text(
             text = stringResource(Res.string.add_action_suggestions),
             style = PapiPuntosTheme.typography.labelMedium,

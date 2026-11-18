@@ -57,6 +57,7 @@ class RedeemViewModelTest {
     private class RecordingRewardRepository : RewardRepository {
         var request: RedemptionRequest? = null
         override suspend fun seedCatalog(): Result<Unit> = Result.success(Unit)
+        override suspend fun addReward(reward: Reward): Result<Unit> = Result.success(Unit)
         override fun observeCatalog(): Flow<List<Reward>> = emptyFlow()
         override fun observeRedemptions(): Flow<List<Redemption>> = emptyFlow()
         override suspend fun redeem(request: RedemptionRequest): Result<Redemption> {

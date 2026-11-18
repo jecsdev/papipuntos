@@ -10,8 +10,11 @@ import kotlinx.coroutines.flow.Flow
 /** Room access for the seedable reward catalog and the per-profile debit ledger. */
 @Dao
 interface RewardDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsertCatalog(rewards: List<RewardEntity>)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun seedCatalog(rewards: List<RewardEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insertReward(reward: RewardEntity)
 
     @Query("SELECT * FROM reward_catalog ORDER BY cost ASC, id ASC")
     fun observeCatalog(): Flow<List<RewardEntity>>

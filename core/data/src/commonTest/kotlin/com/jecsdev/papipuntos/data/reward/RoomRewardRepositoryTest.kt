@@ -5,6 +5,7 @@ import com.jecsdev.papipuntos.data.db.RewardDao
 import com.jecsdev.papipuntos.data.db.RewardEntity
 import com.jecsdev.papipuntos.domain.reward.RedemptionRequest
 import com.jecsdev.papipuntos.model.Player
+import com.jecsdev.papipuntos.model.Reward
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
@@ -21,11 +22,14 @@ class RoomRewardRepositoryTest {
 
         repository.seedCatalog()
         repository.seedCatalog()
+        repository.addReward(Reward("custom-1", "Cena especial", 200, "🍽️")).getOrThrow()
+        repository.seedCatalog()
         val result = repository.redeem(
             RedemptionRequest("redemption-1", "r1", Player.Papi, "Celebración", 100L),
         )
 
-        assertEquals(8, dao.catalog.value.size)
+        assertEquals(9, dao.catalog.value.size)
+        assertEquals("Cena especial", dao.catalog.value.first { it.id == "custom-1" }.label)
         assertTrue(result.isSuccess)
         assertEquals("Noche de película elegida por mí", result.getOrThrow().rewardLabel)
         assertEquals("Celebración", result.getOrThrow().reason)
@@ -46,8 +50,13 @@ class RoomRewardRepositoryTest {
         val catalog = MutableStateFlow<List<RewardEntity>>(emptyList())
         private val redemptions = MutableStateFlow<List<RedemptionEntity>>(emptyList())
 
-        override suspend fun upsertCatalog(rewards: List<RewardEntity>) {
-            catalog.value = (catalog.value.associateBy { it.id } + rewards.associateBy { it.id }).values.toList()
+        override suspend fun seedCatalog(rewards: List<RewardEntity>) {
+            catalog.value = (rewards.associateBy { it.id } + catalog.value.associateBy { it.id }).values.toList()
+        }
+
+        override suspend fun insertReward(reward: RewardEntity) {
+            require(catalog.value.none { it.id == reward.id })
+            catalog.value += reward
         }
 
         override fun observeCatalog(): Flow<List<RewardEntity>> = catalog

@@ -2,14 +2,14 @@ package com.jecsdev.papipuntos.feature.scoreboard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -75,47 +75,47 @@ fun HistoryScreenContent(
     onBack: () -> Unit = {},
 ) {
     val visible = actions.filter { filter.player == null || it.player == filter.player }
-    Column(
+    LazyColumn(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp)
-            .padding(top = 12.dp, bottom = 24.dp),
+            .padding(horizontal = 20.dp),
+        contentPadding = PaddingValues(top = 12.dp, bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        PapiPuntosTopBar(title = "Historial", onBack = onBack)
+        item { PapiPuntosTopBar(title = "Historial", onBack = onBack) }
 
-        Spacer(Modifier.height(12.dp))
-        SegmentedToggle(
-            options = HistoryFilter.entries.map { it.label },
-            selectedIndex = filter.ordinal,
-            onSelect = { onFilterChange(HistoryFilter.entries[it]) },
-            // Only the active pill is colored: neutral for "Todos", profile color otherwise.
-            activeContainerColor = when (filter) {
-                HistoryFilter.All -> MaterialTheme.colorScheme.onBackground
-                HistoryFilter.Papi -> PapiPuntosTheme.colors.papi
-                HistoryFilter.Mami -> PapiPuntosTheme.colors.mami
-            },
-            activeContentColor = when (filter) {
-                HistoryFilter.All -> MaterialTheme.colorScheme.background
-                else -> Color.White
-            },
-        )
+        item { Spacer(Modifier.height(4.dp)) }
+        item {
+            SegmentedToggle(
+                options = HistoryFilter.entries.map { it.label },
+                selectedIndex = filter.ordinal,
+                onSelect = { onFilterChange(HistoryFilter.entries[it]) },
+                activeContainerColor = when (filter) {
+                    HistoryFilter.All -> MaterialTheme.colorScheme.onBackground
+                    HistoryFilter.Papi -> PapiPuntosTheme.colors.papi
+                    HistoryFilter.Mami -> PapiPuntosTheme.colors.mami
+                },
+                activeContentColor = when (filter) {
+                    HistoryFilter.All -> MaterialTheme.colorScheme.background
+                    else -> Color.White
+                },
+            )
+        }
 
-        Spacer(Modifier.height(20.dp))
-        Text(
-            text = "TODAS LAS ACCIONES",
-            style = PapiPuntosTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            letterSpacing = 0.08.em,
-        )
+        item { Spacer(Modifier.height(12.dp)) }
+        item {
+            Text(
+                text = "TODAS LAS ACCIONES",
+                style = PapiPuntosTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                letterSpacing = 0.08.em,
+            )
+        }
 
-        Spacer(Modifier.height(8.dp))
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            visible.forEach { entry ->
-                ActionEntryRow(entry = entry)
-            }
+        items(visible, key = { it.id }) { entry ->
+            ActionEntryRow(entry = entry)
         }
     }
 }

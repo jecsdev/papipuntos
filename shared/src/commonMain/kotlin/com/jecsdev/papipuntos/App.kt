@@ -3,10 +3,13 @@ package com.jecsdev.papipuntos
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -17,10 +20,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.jecsdev.papipuntos.data.db.platformAuthModule
 import com.jecsdev.papipuntos.data.di.dataModule
@@ -103,8 +106,8 @@ fun App() {
 private fun AppRoot() {
     val authViewModel: AuthViewModel = koinViewModel()
     val authState by authViewModel.authState.collectAsStateWithLifecycle()
+    val bootstrapError by authViewModel.bootstrapError.collectAsStateWithLifecycle()
     val navController = rememberNavController()
-    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
     var selectedReward by remember { mutableStateOf<Reward?>(null) }
 
     LaunchedEffect(authState) {
@@ -113,7 +116,7 @@ private fun AppRoot() {
             AuthState.LoggedOut -> navController.replaceWith(AppRoute.LOGIN)
             AuthState.NeedsSetup -> navController.replaceWith(AppRoute.PROFILE_SETUP)
             is AuthState.ProfileSelection -> navController.replaceWith(AppRoute.PROFILE_SELECTION)
-            is AuthState.Active -> if (currentRoute !in AppRoute.ACTIVE_ROUTES) {
+            is AuthState.Active -> if (navController.currentDestination?.route !in AppRoute.ACTIVE_ROUTES) {
                 navController.replaceWith(AppRoute.SCOREBOARD)
             }
         }
@@ -147,94 +150,122 @@ private fun AppRoot() {
             )
         },
     ) {
-        composable(AppRoute.SPLASH) { SplashScreen() }
+        composable(AppRoute.SPLASH) { SplashScreen(bootstrapError, authViewModel::retryBootstrap) }
         composable(AppRoute.LOGIN) { LoginScreen() }
         composable(AppRoute.PROFILE_SETUP) { ProfileSetupScreen() }
         composable(AppRoute.PROFILE_SELECTION) {
             (authState as? AuthState.ProfileSelection)?.let { state ->
                 ProfilesScreen(profiles = state.profiles)
-            }
+            } ?: SplashScreen()
         }
-        composable(AppRoute.SCOREBOARD) {
+        composable(AppRoute.SCOREBOARD) { entry ->
             (authState as? AuthState.Active)?.let { state ->
                 ScoreboardScreen(
                     activePlayer = state.current.player,
                     profiles = state.profiles,
-                    onAddAction = { navController.navigate(AppRoute.ADD_ACTION) },
-                    onSeeAllHistory = { navController.navigate(AppRoute.HISTORY) },
-                    onOpenRewards = { navController.navigate(AppRoute.REWARDS) },
-                    onOpenProfile = { navController.navigate(AppRoute.PROFILE) },
-                    onOpenApprovals = { navController.navigate(AppRoute.APPROVALS) },
+                    onAddAction = { navController.navigateFrom(entry, AppRoute.ADD_ACTION) },
+                    onSeeAllHistory = { navController.navigateFrom(entry, AppRoute.HISTORY) },
+                    onOpenRewards = { navController.navigateFrom(entry, AppRoute.REWARDS) },
+                    onOpenProfile = { navController.navigateFrom(entry, AppRoute.PROFILE) },
+                    onOpenApprovals = { navController.navigateFrom(entry, AppRoute.APPROVALS) },
+                    onSwitchProfile = { authViewModel.requestProfileSwitch() },
                 )
-            }
+            } ?: SplashScreen()
         }
-        composable(AppRoute.ADD_ACTION) {
+        composable(AppRoute.ADD_ACTION) { entry ->
             (authState as? AuthState.Active)?.let { state ->
                 AddActionScreen(
                     activePlayer = state.current.player,
-                    onBack = { navController.popBackStack() },
-                    onActionPicked = { _, _ -> navController.popBackStack() },
+                    onBack = { navController.popFrom(entry) },
+                    onActionPicked = { _, _ -> navController.popFrom(entry) },
                 )
-            }
+            } ?: SplashScreen()
         }
-        composable(AppRoute.APPROVALS) {
+        composable(AppRoute.APPROVALS) { entry ->
             (authState as? AuthState.Active)?.let { state ->
                 ApprovalsScreen(
                     activePlayer = state.current.player,
-                    onBack = { navController.popBackStack() },
+                    onBack = { navController.popFrom(entry) },
                 )
-            }
+            } ?: SplashScreen()
         }
-        composable(AppRoute.HISTORY) {
+        composable(AppRoute.HISTORY) { entry ->
             (authState as? AuthState.Active)?.let { state ->
                 HistoryScreen(
                     activePlayer = state.current.player,
                     profiles = state.profiles,
-                    onBack = { navController.popBackStack() },
+                    onBack = { navController.popFrom(entry) },
                 )
-            }
+            } ?: SplashScreen()
         }
-        composable(AppRoute.REWARDS) {
+        composable(AppRoute.REWARDS) { entry ->
             (authState as? AuthState.Active)?.let { state ->
                 RewardsScreen(
                     activePlayer = state.current.player,
-                    onBack = { navController.popBackStack() },
+                    onBack = { navController.popFrom(entry) },
                     onRewardSelected = { reward ->
-                        selectedReward = reward
-                        navController.navigate(AppRoute.REDEEM)
+                        if (navController.currentBackStackEntry === entry) {
+                            selectedReward = reward
+                            navController.navigateFrom(entry, AppRoute.REDEEM)
+                        }
                     },
                 )
-            }
+            } ?: SplashScreen()
         }
-        composable(AppRoute.REDEEM) {
+        composable(AppRoute.REDEEM) { entry ->
             (authState as? AuthState.Active)?.let { state ->
                 selectedReward?.let { reward ->
                     RedeemScreen(
                         reward = reward,
                         activePlayer = state.current.player,
-                        onBack = { navController.popBackStack() },
+                        onBack = { navController.popFrom(entry) },
                     )
+                } ?: run {
+                    LaunchedEffect(entry) {
+                        if (navController.currentBackStackEntry === entry &&
+                            !navController.popBackStack(AppRoute.REWARDS, inclusive = false)
+                        ) {
+                            navController.navigate(AppRoute.REWARDS) {
+                                popUpTo(AppRoute.REDEEM) { inclusive = true }
+                                launchSingleTop = true
+                            }
+                        }
+                    }
+                    SplashScreen()
                 }
-            }
+            } ?: SplashScreen()
         }
-        composable(AppRoute.PROFILE) {
+        composable(AppRoute.PROFILE) { entry ->
             (authState as? AuthState.Active)?.let { state ->
                 ProfileScreen(
                     activePlayer = state.current.player,
                     profiles = state.profiles,
-                    onBack = { navController.popBackStack() },
-                    onOpenPlans = { navController.navigate(AppRoute.PLANS) },
+                    onBack = { navController.popFrom(entry) },
+                    onOpenPlans = { navController.navigateFrom(entry, AppRoute.PLANS) },
                     onSwitchProfile = { authViewModel.requestProfileSwitch() },
                 )
-            }
+            } ?: SplashScreen()
         }
-        composable(AppRoute.PLANS) {
+        composable(AppRoute.PLANS) { entry ->
             PlansScreen(
-                onBack = { navController.popBackStack() },
-                onStartTrial = { navController.popBackStack() },
+                onBack = { navController.popFrom(entry) },
+                onStartTrial = { navController.popFrom(entry) },
                 onLogout = { authViewModel.logOut() },
             )
         }
+    }
+}
+
+// During a slide transition the outgoing screen can still have callbacks in flight.
+private fun NavHostController.navigateFrom(entry: NavBackStackEntry, route: String) {
+    if (currentBackStackEntry === entry) {
+        navigate(route) { launchSingleTop = true }
+    }
+}
+
+private fun NavHostController.popFrom(entry: NavBackStackEntry) {
+    if (currentBackStackEntry === entry) {
+        popBackStack()
     }
 }
 
@@ -247,10 +278,17 @@ private fun NavHostController.replaceWith(route: String) {
 
 /** Cold-start placeholder shown while [AuthState.Loading] resolves the persisted session. */
 @Composable
-private fun SplashScreen() {
+private fun SplashScreen(errorMessage: String? = null, onRetry: () -> Unit = {}) {
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            if (errorMessage == null) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            } else {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("No se pudo abrir la app: $errorMessage")
+                    TextButton(onClick = onRetry) { Text("Reintentar") }
+                }
+            }
         }
     }
 }

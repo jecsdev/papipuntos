@@ -17,16 +17,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.jecsdev.papipuntos.designsystem.component.PrimaryActionButton
 import com.jecsdev.papipuntos.designsystem.component.SectionHeader
-import com.jecsdev.papipuntos.designsystem.icon.PapiPuntosIcons
 import com.jecsdev.papipuntos.designsystem.theme.PapiPuntosTheme
 import com.jecsdev.papipuntos.feature.scoreboard.component.ActionEntryRow
 import com.jecsdev.papipuntos.feature.scoreboard.component.ScoreCard
@@ -52,26 +47,26 @@ fun ScoreboardScreen(
     onOpenRewards: () -> Unit = {},
     onOpenProfile: () -> Unit = {},
     onOpenApprovals: () -> Unit = {},
+    onSwitchProfile: () -> Unit = {},
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    var selectedTab by remember { mutableStateOf(ScoreboardTab.Home) }
     ScoreboardScreenContent(
         state = state,
         activePlayer = activePlayer,
-        selectedTab = selectedTab,
+        selectedTab = ScoreboardTab.Home,
         // Tabs that own a screen navigate away; Home just stays put.
         onTabSelected = { tab ->
-            selectedTab = tab
             when (tab) {
                 ScoreboardTab.Home -> Unit
                 ScoreboardTab.History -> onSeeAllHistory()
+                ScoreboardTab.Actions -> onAddAction()
                 ScoreboardTab.Rewards -> onOpenRewards()
                 ScoreboardTab.Profile -> onOpenProfile()
             }
         },
-        onAddAction = onAddAction,
         onSeeAllHistory = onSeeAllHistory,
         onOpenApprovals = onOpenApprovals,
+        onSwitchProfile = onSwitchProfile,
     )
 }
 
@@ -83,9 +78,9 @@ fun ScoreboardScreenContent(
     selectedTab: ScoreboardTab,
     modifier: Modifier = Modifier,
     onTabSelected: (ScoreboardTab) -> Unit = {},
-    onAddAction: () -> Unit = {},
     onSeeAllHistory: () -> Unit = {},
     onOpenApprovals: () -> Unit = {},
+    onSwitchProfile: () -> Unit = {},
 ) {
     Box(
         modifier = modifier
@@ -104,6 +99,7 @@ fun ScoreboardScreenContent(
                 activeName = if (activePlayer == Player.Papi) state.papiName else state.mamiName,
                 activeAvatar = if (activePlayer == Player.Papi) state.papiAvatar else state.mamiAvatar,
                 activePlayer = activePlayer,
+                onSwitchProfile = onSwitchProfile,
             )
 
             Spacer(Modifier.height(20.dp))
@@ -149,14 +145,6 @@ fun ScoreboardScreenContent(
                     onActionClick = onOpenApprovals,
                 )
             }
-
-            Spacer(Modifier.height(24.dp))
-
-            PrimaryActionButton(
-                text = "Agregar acción",
-                onClick = onAddAction,
-                leadingIcon = PapiPuntosIcons.Add,
-            )
 
             // Leaves room for the floating bottom bar (mockup `pb-24`).
             Spacer(Modifier.height(96.dp))

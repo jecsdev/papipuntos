@@ -6,6 +6,7 @@ import com.jecsdev.papipuntos.data.auth.AuthRepository
 import com.jecsdev.papipuntos.model.AuthState
 import com.jecsdev.papipuntos.model.NewProfile
 import com.jecsdev.papipuntos.model.Player
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -22,9 +23,20 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         AuthState.Loading,
     )
 
-    init {
-        // Restore the persisted session on cold start; the flow stays on Loading until this resolves.
-        viewModelScope.launch { repository.bootstrap() }
+    private val _bootstrapError = MutableStateFlow<String?>(null)
+    val bootstrapError: StateFlow<String?> = _bootstrapError.asStateFlow()
+
+    init { retryBootstrap() }
+
+    fun retryBootstrap() = viewModelScope.launch {
+        _bootstrapError.value = null
+        try {
+            repository.bootstrap()
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (error: Exception) {
+            _bootstrapError.value = error.message ?: "No se pudo cargar la sesión"
+        }
     }
 
     private val _error = MutableStateFlow<String?>(null)

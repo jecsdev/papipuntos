@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +27,7 @@ fun ScoreboardHeader(
     activeAvatar: String,
     activePlayer: Player,
     modifier: Modifier = Modifier,
+    onSwitchProfile: () -> Unit = {},
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -44,6 +46,7 @@ fun ScoreboardHeader(
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(top = 2.dp),
             )
+            TextButton(onClick = onSwitchProfile) { Text("Cambiar perfil") }
         }
 
         ProfileAvatar(

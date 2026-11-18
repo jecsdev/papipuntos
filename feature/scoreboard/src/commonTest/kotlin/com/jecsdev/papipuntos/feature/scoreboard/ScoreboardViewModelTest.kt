@@ -7,6 +7,7 @@ import com.jecsdev.papipuntos.model.Action
 import com.jecsdev.papipuntos.model.ActionStatus
 import com.jecsdev.papipuntos.model.Player
 import com.jecsdev.papipuntos.model.Profile
+import com.jecsdev.papipuntos.model.Reward
 import com.jecsdev.papipuntos.model.other
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -98,6 +99,7 @@ class ScoreboardViewModelTest {
 
     private object EmptyRewardRepository : RewardRepository {
         override suspend fun seedCatalog(): Result<Unit> = Result.success(Unit)
+        override suspend fun addReward(reward: Reward): Result<Unit> = Result.success(Unit)
         override fun observeCatalog() = emptyFlow<List<com.jecsdev.papipuntos.model.Reward>>()
         override fun observeRedemptions() =
             kotlinx.coroutines.flow.flowOf(emptyList<com.jecsdev.papipuntos.model.Redemption>())

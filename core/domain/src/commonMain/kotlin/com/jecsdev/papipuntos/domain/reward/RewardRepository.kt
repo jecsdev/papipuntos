@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 /** Persistence boundary for the local reward catalog and immutable redemption ledger. */
 interface RewardRepository {
     suspend fun seedCatalog(): Result<Unit>
+    suspend fun addReward(reward: Reward): Result<Unit>
     fun observeCatalog(): Flow<List<Reward>>
     fun observeRedemptions(): Flow<List<Redemption>>
 

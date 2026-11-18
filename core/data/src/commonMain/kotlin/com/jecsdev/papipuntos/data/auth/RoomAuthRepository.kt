@@ -17,10 +17,12 @@ import io.github.jan.supabase.auth.status.SessionStatus
 import io.github.jan.supabase.auth.user.UserSession
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Room-backed auth store (stage 4). Passwords and PINs are persisted only as PBKDF2
@@ -74,7 +76,7 @@ class RoomAuthRepository(
         if (dao.getAccount() != null) {
             return Result.failure(IllegalStateException("Ya existe una cuenta con este correo"))
         }
-        val hashed = hasher.hash(password)
+        val hashed = withContext(Dispatchers.Default) { hasher.hash(password) }
         // A fresh sign-up opens a live session so onboarding (profile setup) survives a restart.
         // Email is trimmed + lowercased so casing or stray spaces can't split one identity into two accounts.
         dao.upsertAccount(
@@ -99,12 +101,10 @@ class RoomAuthRepository(
         // Compare against the trimmed + lowercased form so casing or stray spaces still log in.
         // A remote (Google/Apple) account has no local password — hash/salt are null — so
         // password login simply fails for it, with the same generic message.
-        if (account == null ||
-            hash == null ||
-            salt == null ||
-            account.email != email.trim().lowercase() ||
-            !hasher.verify(password, salt, hash)
-        ) {
+        val credentialsMatch = account != null && hash != null && salt != null &&
+            account.email == email.trim().lowercase() &&
+            withContext(Dispatchers.Default) { hasher.verify(password, salt, hash) }
+        if (!credentialsMatch) {
             return Result.failure(IllegalStateException("Correo o contraseña incorrectos"))
         }
         dao.setSessionActive(true)
@@ -163,7 +163,8 @@ class RoomAuthRepository(
         papi: NewProfile,
         mami: NewProfile,
     ): Result<Unit> {
-        dao.upsertProfiles(listOf(papi.toEntity(), mami.toEntity()))
+        val profileEntities = withContext(Dispatchers.Default) { listOf(papi.toEntity(), mami.toEntity()) }
+        dao.upsertProfiles(profileEntities)
         _state.value = AuthState.ProfileSelection(dao.getProfiles().toDomain())
         return Result.success(Unit)
     }
@@ -174,7 +175,7 @@ class RoomAuthRepository(
     ): Result<Unit> {
         val profile = dao.getProfile(player.name)
             ?: return Result.failure(IllegalStateException("Perfil no encontrado"))
-        if (!hasher.verify(pin, profile.pinSalt, profile.pinHash)) {
+        if (!withContext(Dispatchers.Default) { hasher.verify(pin, profile.pinSalt, profile.pinHash) }) {
             return Result.failure(IllegalStateException("PIN incorrecto"))
         }
         _state.value = AuthState.Active(current = profile.toDomain(), profiles = dao.getProfiles().toDomain())

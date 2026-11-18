@@ -14,7 +14,13 @@ import kotlinx.coroutines.flow.map
 
 /** Local-first reward repository; catalog seeding is repeatable and preserves all debits. */
 class RoomRewardRepository(private val dao: RewardDao) : RewardRepository {
-    override suspend fun seedCatalog(): Result<Unit> = runCatching { dao.upsertCatalog(LocalRewardCatalog.rewards) }
+    override suspend fun seedCatalog(): Result<Unit> = runCatching { dao.seedCatalog(LocalRewardCatalog.rewards) }
+
+    override suspend fun addReward(reward: Reward): Result<Unit> = runCatching {
+        require(reward.label.isNotBlank()) { "La recompensa necesita un nombre" }
+        require(reward.cost > 0) { "El costo debe ser mayor que cero" }
+        dao.insertReward(RewardEntity(reward.id, reward.label.trim(), reward.cost, reward.emoji.ifBlank { "🎁" }))
+    }
 
     override fun observeCatalog(): Flow<List<Reward>> = dao.observeCatalog().map { rewards ->
         rewards.map(RewardEntity::toDomain)

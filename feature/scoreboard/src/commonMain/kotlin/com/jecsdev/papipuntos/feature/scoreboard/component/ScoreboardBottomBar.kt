@@ -2,13 +2,15 @@ package com.jecsdev.papipuntos.feature.scoreboard.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -19,17 +21,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.jecsdev.papipuntos.designsystem.icon.PapiPuntosIcons
 import com.jecsdev.papipuntos.designsystem.theme.PapiPuntosTheme
 
-/** The four destinations of the bottom navigation. */
+/** The destinations of the bottom navigation. */
 enum class ScoreboardTab(
     val label: String,
     val icon: ImageVector,
 ) {
     Home("Inicio", PapiPuntosIcons.Home),
     History("Historial", PapiPuntosIcons.History),
+    Actions("Acciones", PapiPuntosIcons.Add),
     Rewards("Canjear", PapiPuntosIcons.Gift),
     Profile("Perfil", PapiPuntosIcons.Person),
 }
@@ -52,6 +56,7 @@ fun ScoreboardBottomBar(
             .clip(shape)
             .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.9f))
             .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f), shape)
+            .selectableGroup()
             .padding(horizontal = 8.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -79,14 +84,15 @@ private fun BottomBarItem(
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick)
+            .heightIn(min = 48.dp)
+            .selectable(selected = selected, role = Role.Tab, onClick = onClick)
             .padding(vertical = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(2.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically),
     ) {
         Icon(
             imageVector = tab.icon,
-            contentDescription = tab.label,
+            contentDescription = null,
             tint = color,
             modifier = Modifier.size(20.dp),
         )

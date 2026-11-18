@@ -44,7 +44,12 @@ class AddActionViewModel(
         _uiState.update { it.copy(query = query) }
     }
 
+    fun clearError() {
+        _uiState.update { it.copy(errorMessage = null) }
+    }
+
     fun submit(suggestion: SuggestedAction) {
+        if (uiState.value.isSubmitting) return
         val target = uiState.value.target
         viewModelScope.launch {
             _uiState.update { it.copy(isSubmitting = true, errorMessage = null) }
@@ -63,6 +68,16 @@ class AddActionViewModel(
                 _uiState.update { it.copy(errorMessage = error?.message ?: "No se pudo guardar la acción") }
             }
             _uiState.update { it.copy(isSubmitting = false) }
+        }
+    }
+
+    fun submitCustom(label: String, points: String, emoji: String) {
+        val parsedPoints = points.toIntOrNull()
+        when {
+            label.isBlank() -> _uiState.update { it.copy(errorMessage = "Escribe el pendiente") }
+            parsedPoints == null || parsedPoints <= 0 ->
+                _uiState.update { it.copy(errorMessage = "Escribe un puntaje mayor que cero") }
+            else -> submit(SuggestedAction("custom", label.trim(), parsedPoints, emoji.ifBlank { "✨" }))
         }
     }
 }

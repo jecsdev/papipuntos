@@ -16,8 +16,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,7 +58,12 @@ fun RewardsScreen(
     ),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val isSaving by viewModel.isSaving.collectAsStateWithLifecycle()
     var filter by remember { mutableStateOf(filters.first()) }
+    var showCreate by remember { mutableStateOf(false) }
+    var label by remember { mutableStateOf("") }
+    var cost by remember { mutableStateOf("") }
+    var emoji by remember { mutableStateOf("🎁") }
     RewardsScreenContent(
         rewards = state.rewards,
         balance = state.balance,
@@ -64,8 +72,44 @@ fun RewardsScreen(
         onFilterChange = { filter = it },
         onBack = onBack,
         onRewardSelected = onRewardSelected,
+        onCreateReward = { showCreate = true },
+        errorMessage = state.errorMessage,
         modifier = modifier,
     )
+    if (showCreate) {
+        AlertDialog(
+            onDismissRequest = { if (!isSaving) showCreate = false },
+            title = { Text("Nueva recompensa") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(label, { label = it }, label = { Text("Recompensa") }, singleLine = true)
+                    OutlinedTextField(
+                        cost,
+                        { cost = it.filter(Char::isDigit) },
+                        label = { Text("Costo en puntos") },
+                        singleLine = true,
+                    )
+                    OutlinedTextField(emoji, { emoji = it }, label = { Text("Emoji") }, singleLine = true)
+                    state.errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.createReward(label, cost, emoji) {
+                            showCreate = false
+                            label = ""
+                            cost = ""
+                        }
+                    },
+                    enabled = !isSaving,
+                ) {
+                    Text("Guardar")
+                }
+            },
+            dismissButton = { TextButton(onClick = { showCreate = false }, enabled = !isSaving) { Text("Cancelar") } },
+        )
+    }
 }
 
 /** Stateless, preview-friendly content with flat parameters. */
@@ -79,6 +123,8 @@ fun RewardsScreenContent(
     onFilterChange: (String) -> Unit = {},
     onBack: () -> Unit = {},
     onRewardSelected: (Reward) -> Unit = {},
+    onCreateReward: () -> Unit = {},
+    errorMessage: String? = null,
 ) {
     Column(
         modifier = modifier
@@ -90,6 +136,9 @@ fun RewardsScreenContent(
             .padding(top = 12.dp, bottom = 24.dp),
     ) {
         PapiPuntosTopBar(title = "Canjear puntos", onBack = onBack)
+
+        TextButton(onClick = onCreateReward, modifier = Modifier.fillMaxWidth()) { Text("+ Agregar recompensa") }
+        errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 
         Spacer(Modifier.height(12.dp))
         Text(
@@ -113,9 +162,14 @@ fun RewardsScreenContent(
         )
 
         Spacer(Modifier.height(20.dp))
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            rewards.filter { reward -> reward.matches(filter) }.forEach { reward ->
-                RewardRow(reward = reward, onClick = { onRewardSelected(reward) })
+        val visibleRewards = rewards.filter { reward -> reward.matches(filter) }
+        if (visibleRewards.isEmpty()) {
+            Text("No hay recompensas con este filtro", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                visibleRewards.forEach { reward ->
+                    RewardRow(reward = reward, balance = balance, onClick = { onRewardSelected(reward) })
+                }
             }
         }
     }
@@ -132,6 +186,7 @@ private fun Reward.matches(filter: String): Boolean = when (filter) {
 @Composable
 private fun RewardRow(
     reward: Reward,
+    balance: Int,
     onClick: () -> Unit,
 ) {
     val shape = PapiPuntosTheme.shapes.xxl
@@ -170,7 +225,7 @@ private fun RewardRow(
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
-                text = "Disponible para canjear",
+                text = if (balance >= reward.cost) "Disponible para canjear" else "Te faltan ${reward.cost - balance} pts",
                 style = PapiPuntosTheme.typography.bodySmall.copy(fontSize = 11.sp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
