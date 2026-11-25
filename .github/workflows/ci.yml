@@ -36,11 +36,10 @@ jobs:
       - name: Assemble + unit tests
         run: ./gradlew assembleDebug allTests --stacktrace
 
-  # The only cross-check that the Kotlin/Native iOS targets still compile. Needs a macOS runner
-  # (Xcode toolchain); compile-only, no simulator boot.
+  # Xcode builds the simulator app and invokes Gradle to link the shared Kotlin framework.
   ios:
-    name: iOS compile
-    runs-on: macos-latest
+    name: iOS simulator app
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
 
@@ -53,8 +52,33 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
 
-      - name: Compile iOS target
-        run: ./gradlew compileKotlinIosSimulatorArm64 --stacktrace
+      - name: Build ARM64 simulator app
+        env:
+          # Match the Xcode SDK supported by Kotlin 2.4.0.
+          DEVELOPER_DIR: /Applications/Xcode_26.4.app/Contents/Developer
+        shell: bash
+        run: |
+          build_dir="$RUNNER_TEMP/papipuntos-ios"
+          xcodebuild \
+            -project iosApp/iosApp.xcodeproj \
+            -target iosApp \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            "CONFIGURATION_BUILD_DIR=$build_dir" \
+            ARCHS=arm64 \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+          test -x "$build_dir/Papipuntos.app/Papipuntos"
+          ditto -c -k --keepParent "$build_dir/Papipuntos.app" \
+            "$RUNNER_TEMP/Papipuntos.app.zip"
+
+      - name: Upload simulator app
+        uses: actions/upload-artifact@v5
+        with:
+          name: papipuntos-ios-simulator-arm64
+          path: ${{ runner.temp }}/Papipuntos.app.zip
+          if-no-files-found: error
 
   # Style (ktlint) + code smells (detekt). Run as standalone CLIs so they stay decoupled from the
   # Gradle 9.1 build. Config lives in .editorconfig (ktlint) and config/detekt/detekt.yml.
