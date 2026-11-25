@@ -71,7 +71,11 @@ class AddActionViewModel(
         }
     }
 
-    fun submitCustom(label: String, points: String, emoji: String) {
+    fun submitCustom(
+        label: String,
+        points: String,
+        emoji: String,
+    ) {
         val parsedPoints = points.toIntOrNull()
         when {
             label.isBlank() -> _uiState.update { it.copy(errorMessage = "Escribe el pendiente") }

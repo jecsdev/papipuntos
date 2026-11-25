@@ -101,7 +101,9 @@ class RoomAuthRepository(
         // Compare against the trimmed + lowercased form so casing or stray spaces still log in.
         // A remote (Google/Apple) account has no local password — hash/salt are null — so
         // password login simply fails for it, with the same generic message.
-        val credentialsMatch = account != null && hash != null && salt != null &&
+        val credentialsMatch = account != null &&
+            hash != null &&
+            salt != null &&
             account.email == email.trim().lowercase() &&
             withContext(Dispatchers.Default) { hasher.verify(password, salt, hash) }
         if (!credentialsMatch) {

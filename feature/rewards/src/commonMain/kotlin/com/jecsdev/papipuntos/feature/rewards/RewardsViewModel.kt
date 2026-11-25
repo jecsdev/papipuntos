@@ -9,8 +9,8 @@ import com.jecsdev.papipuntos.model.ActionStatus
 import com.jecsdev.papipuntos.model.Player
 import com.jecsdev.papipuntos.model.Reward
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -55,7 +55,12 @@ class RewardsViewModel(
         }
     }
 
-    fun createReward(label: String, cost: String, emoji: String, onSaved: () -> Unit) {
+    fun createReward(
+        label: String,
+        cost: String,
+        emoji: String,
+        onSaved: () -> Unit,
+    ) {
         if (_isSaving.value) return
         val points = cost.toIntOrNull()
         when {
@@ -65,7 +70,10 @@ class RewardsViewModel(
                 _isSaving.value = true
                 try {
                     rewardRepository.addReward(Reward(idGenerator.next(), label.trim(), points, emoji.ifBlank { "🎁" }))
-                        .onSuccess { errorMessage.value = null; onSaved() }
+                        .onSuccess {
+                            errorMessage.value = null
+                            onSaved()
+                        }
                         .onFailure { errorMessage.value = it.message ?: "No se pudo guardar la recompensa" }
                 } finally {
                     _isSaving.value = false

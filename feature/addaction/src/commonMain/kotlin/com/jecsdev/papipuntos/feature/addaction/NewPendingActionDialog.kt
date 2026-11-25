@@ -119,7 +119,10 @@ internal fun NewPendingActionDialog(
                         singleLine = true,
                         enabled = !isSubmitting,
                         isError = invalidPoints,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Next,
+                        ),
                         shape = fieldShape,
                         colors = fieldColors,
                     )
@@ -158,7 +161,11 @@ internal fun NewPendingActionDialog(
                         textAlign = TextAlign.Center,
                     )
                 }
-                TextButton(onClick = onDismiss, enabled = !isSubmitting, modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                TextButton(
+                    onClick = onDismiss,
+                    enabled = !isSubmitting,
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                ) {
                     Text("Cancelar", color = if (isSubmitting) colors.onSurfaceVariant else colors.onSurface)
                 }
             }

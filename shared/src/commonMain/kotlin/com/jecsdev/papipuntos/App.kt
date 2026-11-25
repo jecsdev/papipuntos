@@ -257,7 +257,10 @@ private fun AppRoot() {
 }
 
 // During a slide transition the outgoing screen can still have callbacks in flight.
-private fun NavHostController.navigateFrom(entry: NavBackStackEntry, route: String) {
+private fun NavHostController.navigateFrom(
+    entry: NavBackStackEntry,
+    route: String,
+) {
     if (currentBackStackEntry === entry) {
         navigate(route) { launchSingleTop = true }
     }
@@ -278,7 +281,10 @@ private fun NavHostController.replaceWith(route: String) {
 
 /** Cold-start placeholder shown while [AuthState.Loading] resolves the persisted session. */
 @Composable
-private fun SplashScreen(errorMessage: String? = null, onRetry: () -> Unit = {}) {
+private fun SplashScreen(
+    errorMessage: String? = null,
+    onRetry: () -> Unit = {},
+) {
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             if (errorMessage == null) {

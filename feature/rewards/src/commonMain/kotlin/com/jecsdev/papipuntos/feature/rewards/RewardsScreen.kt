@@ -225,7 +225,11 @@ private fun RewardRow(
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
-                text = if (balance >= reward.cost) "Disponible para canjear" else "Te faltan ${reward.cost - balance} pts",
+                text = if (balance >= reward.cost) {
+                    "Disponible para canjear"
+                } else {
+                    "Te faltan ${reward.cost - balance} pts"
+                },
                 style = PapiPuntosTheme.typography.bodySmall.copy(fontSize = 11.sp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

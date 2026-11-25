@@ -26,7 +26,9 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
     private val _bootstrapError = MutableStateFlow<String?>(null)
     val bootstrapError: StateFlow<String?> = _bootstrapError.asStateFlow()
 
-    init { retryBootstrap() }
+    init {
+        retryBootstrap()
+    }
 
     fun retryBootstrap() = viewModelScope.launch {
         _bootstrapError.value = null
