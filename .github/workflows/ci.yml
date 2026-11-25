@@ -52,7 +52,7 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
 
-      - name: Build ARM64 simulator app
+      - name: Build Release ARM64 simulator app
         env:
           # Match the Xcode SDK supported by Kotlin 2.4.0.
           DEVELOPER_DIR: /Applications/Xcode_26.4.app/Contents/Developer
@@ -62,22 +62,29 @@ jobs:
           xcodebuild \
             -project iosApp/iosApp.xcodeproj \
             -target iosApp \
-            -configuration Debug \
+            -configuration Release \
             -sdk iphonesimulator \
             "CONFIGURATION_BUILD_DIR=$build_dir" \
             ARCHS=arm64 \
             CODE_SIGNING_ALLOWED=NO \
             build
 
-          test -x "$build_dir/Papipuntos.app/Papipuntos"
+          app_binary="$build_dir/Papipuntos.app/Papipuntos"
+          test -x "$app_binary"
+          xcrun otool -l "$app_binary" > "$build_dir/macho-load-commands.txt"
+          if grep -Eq '^[[:space:]]*segname[[:space:]]+__DWARF$' "$build_dir/macho-load-commands.txt"; then
+            echo "::error::Release executable contains embedded DWARF debug information."
+            exit 1
+          fi
+
           ditto -c -k --keepParent "$build_dir/Papipuntos.app" \
             "$RUNNER_TEMP/Papipuntos.app.zip"
 
       - name: Upload simulator app
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
-          name: papipuntos-ios-simulator-arm64
           path: ${{ runner.temp }}/Papipuntos.app.zip
+          archive: false
           if-no-files-found: error
 
   # Style (ktlint) + code smells (detekt). Run as standalone CLIs so they stay decoupled from the
